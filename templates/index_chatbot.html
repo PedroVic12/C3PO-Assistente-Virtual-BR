@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C3PO Assistente Pessoal</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #model-select {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        #chat-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .user-message {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+        }
+
+        .assistant-message {
+            background-color: #e9e9eb;
+            align-self: flex-start;
+        }
+
+        .input-area {
+            display: flex;
+            margin-top: auto;
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+        }
+
+        #send-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #send-button:hover {
+            background-color: #45a049;
+        }
+
+        #voice-toggle {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #voice-toggle:hover {
+            background-color: #45a049;
+        }
+
+        #voice-toggle.off {
+            background-color: #f44336;
+        }
+
+        #voice-toggle.off:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+
+        // import React from 'react'
+        
+    /*  import {createRoot} from 'react-dom/client'
+        import Markdown from 'react-markdown'
+        import remarkGfm from 'remark-gfm'
+
+        const markdown = `Just a link: www.nasa.gov.`
+
+        createRoot(document.body).render(
+          <Markdown remarkPlugins={[remarkGfm]}>{markdown}</Markdown>
+        )
+    */
+
+
+
+        class ChatbotUser extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    userInput: '',
+                    conversationHistory: [{ role: 'system', content: 'Você é um assistente atencioso.' }],
+                    models: [],
+                    selectedModel: 'gemini-pro', // Default model
+                    voiceEnabled: true,
+                    audioFile: null
+                };
+            }
+
+            componentDidMount() {
+                this.fetchModels();
+            }
+
+            fetchModels = async () => {
+                try {
+                    const response = await axios.get('/models');
+                    this.setState({ models: response.data });
+                } catch (error) {
+                    console.error('Erro ao buscar modelos:', error);
+                }
+            };
+
+            handleInputChange = (event) => {
+                this.setState({ userInput: event.target.value });
+            };
+
+            handleModelChange = (event) => {
+                this.setState({ selectedModel: event.target.value });
+            };
+
+            toggleVoice = () => {
+                this.setState(prevState => ({ voiceEnabled: !prevState.voiceEnabled }));
+            };
+
+            sendMessage = async () => {
+                const { userInput, conversationHistory, selectedModel, voiceEnabled } = this.state;
+                if (userInput.trim() !== '') {
+                    this.setState(prevState => ({
+                        conversationHistory: [...prevState.conversationHistory, { role: 'user', content: userInput }],
+                        userInput: ''
+                    }));
+
+                    try {
+                        const response = await axios.post('/chat', {
+                            model: selectedModel,
+                            user_input: userInput,
+                            conversation_history: conversationHistory,
+                            voice_enabled: voiceEnabled
+                        });
+
+                        this.setState(prevState => ({
+                            conversationHistory: response.data.conversation_history,
+                            audioFile: response.data.audio_file
+                        }));
+
+                        if (voiceEnabled && this.state.audioFile) {
+                            const audio = new Audio(`/audio/${this.state.audioFile}`);
+                            audio.play();
+                        }
+                    } catch (error) {
+                        console.error('Erro ao enviar mensagem:', error);
+                    }
+                }
+            };
+
+            render() {
+                const { userInput, conversationHistory, models, selectedModel, voiceEnabled } = this.state;
+                return (
+                    <div className="container">
+
+                        <h1>Assistente de Pedro Victor Veras C3PO! Tdah, produtividade, rotinas e treinos!</h1>
+                        <div>
+                            <img src="https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif" alt="Description of the GIF" />
+                        </div>
+                        <select id="model-select" value={selectedModel} onChange={this.handleModelChange}>
+                            {models.map(model => (
+                                <option key={model} value={model}>{model}</option>
+                            ))}
+                        </select>
+                        <button id="voice-toggle" className={voiceEnabled ? '' : 'off'} onClick={this.toggleVoice}>
+                            Voz: {voiceEnabled ? 'Ligada' : 'Desligada'}
+                        </button>
+                        <div id="chat-history">
+                            {conversationHistory.map((message, index) => (
+                                <div key={index} className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}>
+                                    <strong>{message.role === 'user' ? 'Você' : 'Assistente'}:</strong> {message.content}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="input-area">
+                            <input
+                                type="text"
+                                id="user-input"
+                                placeholder="Digite sua mensagem..."
+                                value={userInput}
+                                onChange={this.handleInputChange}
+                                onKeyPress={event => event.key === 'Enter' && this.sendMessage()}
+                            />
+                            <button id="send-button" onClick={this.sendMessage}>Enviar</button>
+                        </div>
+                    </div>
+                );
+            }
+        }
+
+        class App extends React.Component {
+            render() {
+                return (
+
+
+
+                    <ChatbotUser />
+                );
+            }
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>
