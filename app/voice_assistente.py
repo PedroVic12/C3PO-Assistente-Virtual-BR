@@ -56,3 +56,8 @@ def textToSpeachEleven(texto):
         # Print the error message if the request was not successful
         print(response.text)
 
+
+
+textToSpeachEleven(
+        "alo alo galera do cauboi alo alo galera do piao, esta chegando sexta feira sua lindaaaa, vem ni mim"
+    )

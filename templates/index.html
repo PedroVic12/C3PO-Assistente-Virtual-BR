@@ -229,6 +229,9 @@
                         <button id="voice-toggle" className={voiceEnabled ? '' : 'off'} onClick={this.toggleVoice}>
                             Voz: {voiceEnabled ? 'Ligada' : 'Desligada'}
                         </button>
+
+
+                       
                         <div id="chat-history">
                             {conversationHistory.map((message, index) => (
                                 <div key={index} className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}>
@@ -255,7 +258,6 @@
         class App extends React.Component {
             render() {
                 return (
-
 
 
                     <ChatbotUser />
