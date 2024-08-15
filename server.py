@@ -19,7 +19,7 @@ DEFAULT_VOICE = "pt-BR-Wavenet-A"
 
 app = Flask(__name__, static_url_path="/audio", static_folder="audio", template_folder='templates')  # Servidor Flask
 
-PATH = r"/home/pedrov/Downloads/kanban_quadro_model.xlsx"
+#PATH = r"/home/pedrov/Downloads/kanban_quadro_model.xlsx"
 
 genai.configure(api_key=API_KEY)
 
