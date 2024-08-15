@@ -17,7 +17,7 @@ BASE_URL = "https://api.generativeai.google.com/v1beta2"
 DEFAULT_MODEL = "gemini-pro"
 DEFAULT_VOICE = "pt-BR-Wavenet-A"
 
-app = Flask(__name__, static_url_path="/audio", static_folder="audio")  # Servidor Flask
+app = Flask(__name__, static_url_path="/audio", static_folder="audio", template_folder='templates')  # Servidor Flask
 
 PATH = r"/home/pedrov/Downloads/kanban_quadro_model.xlsx"
 
@@ -57,7 +57,10 @@ class repository:
 repo = repository()
 quadro = repo.connect_gemini()
 
-texto = f" Atualmente estou seguindo este quadro para ser kanban : {quadro}"
+#texto = f" Atualmente estou seguindo este quadro para ser kanban : {quadro}"
+
+texto = f"Atualmente estou seguindo uma rotina de 9h de foco, 8h de sono, 1h de treino(2 ou 3 por dia), Trabalho focado (6h), Estudis em 2h, com meditacoes, alongamentos e treinos intercalado com foco."
+
 historico_c3po = history = [
     {
         "role": "user",
@@ -114,7 +117,7 @@ historico_c3po = history = [
     {
         "role": "model",
         "parts": [
-            "Entendido mestre Pedro! Sou seu assistente pessoal para TDAH com estrategias de kanban e scrum para desenvolvedores e cientifico para seus projetos de faculdade"
+            "Entendido mestre Pedro! Sou seu assistente pessoal para TDAH com estrategias de kanban e scrum para desenvolvedores e cientifico.Sou especialista em artigos cienticos que seguem norma de faculdade UFF do Rio de Janeiro, te ajudo a escrever artigos cientificos, conceitos de programação, engenharia, arquitetura de software e testes automatizados. Sua jornada como desenvolvedor e pesquiador é muito inspiradora e pode mudar vidas! igual anakin skywlaker em deixar sua marca no universo!! "
         ],
     },
     {
@@ -127,6 +130,19 @@ historico_c3po = history = [
         "role": "model",
         "parts": [
             "Mestre Pedro, tudo bem! serei simples e nao usarei markdown ou outros caracteres, vou escrever apenas com texto simples com quebras de linha e separando em topicos alem disso, smepre vou olhar seu quadro e ver os nomes das suas tarefas, vou sempre lembrar voce em cada conversa sobre suas 5 tarefas diarias, sendo as principais, estudar, trabalhar e treinar calistenia. Sempre vou te ajudar a se manter organizado usando tecnicas de Scrum e Kanban"
+        ],
+    },
+
+        {
+        "role": "user",
+        "parts": [
+            "Voce é um cara intelingente que sempre usa citacoes de steve jobs, Albert Enstein e Nikola tesla, voce sabe que inovar faz parte da sua jornada!"
+        ],
+    },
+    {
+        "role": "model",
+        "parts": [
+            "Com certeza, mestre Pedro, sempre serei objetivos com respostas em com muito espacos e topicos de ate 200 palavras"
         ],
     },
 ]
@@ -219,14 +235,19 @@ class ChatbotServer:
             return None
 
     def run(self):
-        @app.route("/")
+        @app.route("/",methods=["GET"])
         def index():
             models = self.list_models()
+            print("\nModelos Disponiveis: ", models)
             return render_template(
-                "template_chatbot.html",
+                "index.html",
                 models=models,
                 default_model=DEFAULT_MODEL,
             )
+
+        @app.route("/home")
+        def home():
+            return render_template("home.html")
 
         @app.route("/chat", methods=["POST"])
         def chat():
