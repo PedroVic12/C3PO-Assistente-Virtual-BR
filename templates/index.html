@@ -220,7 +220,15 @@
                         <h1>Assistente de Pedro Victor Veras C3PO! Tdah, produtividade, rotinas e treinos!</h1>
                         <div>
                             <img src="https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif" alt="Description of the GIF" />
+                        
+                            <figure>
+                              <figcaption>Ouça o áudio gerado:</figcaption>
+                              <audio id="audioDownload" controls src="{{ url_for('static', filename='output.mp3') }}"></audio>
+                              <a href="{{ url_for('static', filename='output.mp3') }}">Baixar áudio</a>
+                            </figure>
                         </div>
+
+
                         <select id="model-select" value={selectedModel} onChange={this.handleModelChange}>
                             {models.map(model => (
                                 <option key={model} value={model}>{model}</option>
@@ -229,6 +237,8 @@
                         <button id="voice-toggle" className={voiceEnabled ? '' : 'off'} onClick={this.toggleVoice}>
                             Voz: {voiceEnabled ? 'Ligada' : 'Desligada'}
                         </button>
+
+
 
 
                        
@@ -250,6 +260,9 @@
                             />
                             <button id="send-button" onClick={this.sendMessage}>Enviar</button>
                         </div>
+
+
+
                     </div>
                 );
             }
@@ -266,6 +279,30 @@
         }
 
         ReactDOM.render(<App />, document.getElementById('root'));
+
+
+            const audioPlayer = document.getElementById('audioPlayer');
+    let lastModified = 0;
+
+    function checkAudioUpdate() {
+      fetch('{{ url_for("static", filename="output.mp3") }}', { method: 'HEAD' })
+        .then(response => {
+          if (response.ok) {
+            const newLastModified = Date.parse(response.headers.get('Last-Modified'));
+            if (newLastModified > lastModified) {
+              lastModified = newLastModified;
+              audioPlayer.load(); // Recarregar o áudio
+              audioPlayer.play(); // Reproduzir o áudio automaticamente
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao verificar atualização do áudio:', error);
+        });
+    }
+
+    // Verificar a atualização do áudio a cada 5 segundos
+    setInterval(checkAudioUpdate, 5000); 
     </script>
 </body>
 
