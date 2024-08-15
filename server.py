@@ -45,6 +45,8 @@ class repository:
     def connect_gemini(
         self,
     ):
+        # Função que tem como função enviar arquivos com contexto certo e formato para o gemini ler
+
         quadro = self.get_df(PATH)
         # convertendo dataframe para dicionario
         quadro_dict = quadro.to_dict("records")
@@ -55,7 +57,7 @@ class repository:
 
 
 repo = repository()
-quadro = repo.connect_gemini()
+#quadro = repo.connect_gemini()
 
 #texto = f" Atualmente estou seguindo este quadro para ser kanban : {quadro}"
 
