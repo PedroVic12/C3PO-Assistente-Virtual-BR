@@ -152,7 +152,7 @@
                     models: [],
                     selectedModel: 'gemini-pro', // Default model
                     voiceEnabled: true,
-                    audioFile: null
+                    audioFile: "/static/output.mp3"
                 };
             }
 
@@ -281,7 +281,8 @@
         ReactDOM.render(<App />, document.getElementById('root'));
 
 
-            const audioPlayer = document.getElementById('audioPlayer');
+    // manipulando o audio gerado
+    const audioPlayer = document.getElementById('audioPlayer');
     let lastModified = 0;
 
     function checkAudioUpdate() {
