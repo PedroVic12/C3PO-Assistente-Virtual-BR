@@ -35,12 +35,12 @@
 
     </div>
 
-      <figcaption> Arquivos estaticos Flask</figcaption>
-      <audio controls>
-          <source src="{{ url_for('static', filename=output) }}" type="file/mpeg">
-     
-      </audio>
 
+    <h3>    Seu navegador não suporta o elemento de áudio.</h3>
+  <audio controls>
+<source src="{{ url_for('static', filename='output.mp3') }}" type="audio/mpeg">
+
+  </audio>
 
   <figcaption>    Seu navegador não suporta o elemento de áudio.</figcaption>
   <audio id="audioPlayer" controls>
