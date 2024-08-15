@@ -17,7 +17,7 @@ def textToSpeachEleven(texto):
     CHUNK_SIZE = 1024  # Size of chunks to read/write at a time
     VOICE_ID = "JBFqnCBsd6RMkjVDRZzb"  # ID of the voice model to use
     TEXT_TO_SPEAK = texto
-    OUTPUT_PATH = "./output.mp3"  # Path to save the output audio file
+    OUTPUT_PATH = "../static/output.mp3"  # Path to save the output audio file
 
     # Construct the URL for the Text-to-Speech API request
     tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}/stream"

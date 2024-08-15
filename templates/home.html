@@ -1,16 +1,90 @@
+
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>Flask Tutorial</title>
-  </head>
-  <body>
-    {% extends "template.html" %}
+<html>
+<head>
+  <title>Reprodução Automática de Áudio</title>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+<script nomodule src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" />
+</head>
+<body>
+<IonSegment value="default">
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Card Title</ion-card-title>
+          <ion-card-subtitle>Card Subtitle</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content>
+          Here's a small text description for the card content. Nothing more, nothing less.
+        </ion-card-content>
+    </ion-card>
+
+
+    <ion-card>
+ 
+
+    <div>
     {% block content %}
     
     <h1> My First Try Using Flask </h1>
     <p> Flask is Fun </p>
     
     {% endblock %}
-  </body>
+
+    </div>
+
+      <figcaption> Arquivos estaticos Flask</figcaption>
+      <audio controls>
+          <source src="{{ url_for('static', filename=output) }}" type="file/mpeg">
+     
+      </audio>
+
+
+  <figcaption>    Seu navegador não suporta o elemento de áudio.</figcaption>
+  <audio id="audioPlayer" controls>
+    <source src="/home/pedrov/Documentos/GitHub/C3PO-Assistente-Virtual-BR/app/output.mp3" type="audio/mpeg">
+  </audio>
+
+  <figure>
+  <figcaption>Listen to the T-Rex:</figcaption>
+  <audio controls src="/media/cc0-audio/t-rex-roar.mp3"></audio>
+  <a href="/media/cc0-audio/t-rex-roar.mp3"> Download audio </a>
+</figure>
+
+
+  <script>
+    const audioPlayer = document.getElementById('audioPlayer');
+    let lastModified = 0;
+
+    function checkAudioUpdate() {
+      fetch('../app/output.mp3', { method: 'HEAD' })
+        .then(response => {
+          if (response.ok) {
+            const newLastModified = Date.parse(response.headers.get('Last-Modified'));
+            if (newLastModified > lastModified) {
+              lastModified = newLastModified;
+              audioPlayer.load(); // Recarregar o áudio
+              audioPlayer.play(); // Reproduzir o áudio
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao verificar atualização do áudio:', error);
+        });
+    }
+
+    // Verificar a atualização do áudio a cada 5 segundos
+    setInterval(checkAudioUpdate, 5000); 
+  </script>
+
+
+<style>
+  ion-item {
+    --padding-start: 0;
+  }
+</style>
+
+</body>
 </html>

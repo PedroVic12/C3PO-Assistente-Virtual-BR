@@ -213,7 +213,7 @@ class ChatbotServer:
         )
         return assistant_response, conversation_history
 
-    def text_to_speech(self, text, voice=DEFAULT_VOICE):
+    def text_to_speechGoogle(self, text, voice=DEFAULT_VOICE):
         try:
             headers = {
                 "Authorization": f"Bearer {API_KEY}",
@@ -251,6 +251,10 @@ class ChatbotServer:
         def home():
             return render_template("home.html")
 
+        @app.route('/uploads/<path:filename>')
+        def download_file(filename):
+            return send_from_directory('/app/', filename)
+
         @app.route("/chat", methods=["POST"])
         def chat():
             data = request.json
@@ -264,7 +268,7 @@ class ChatbotServer:
 
             # Generate speech from the response
             audio_file = (
-                self.text_to_speech(response)
+                self.text_to_speechGoogle(response)
                 if data.get("voice_enabled", True)
                 else None
             )
