@@ -1,6 +1,6 @@
 import os
 import tempfile
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory, send_file
 import requests
 from google.api_core import client_options as client_options_lib
 from google.api_core import gapic_v1
@@ -17,8 +17,8 @@ BASE_URL = "https://api.generativeai.google.com/v1beta2"
 DEFAULT_MODEL = "gemini-pro"
 DEFAULT_VOICE = "pt-BR-Wavenet-A"
 
-app = Flask(__name__, static_url_path="/audio", static_folder="audio", template_folder='templates')  # Servidor Flask
-
+app = Flask(__name__, static_url_path="/static", static_folder="static", template_folder='templates')  # Servidor Flask
+app.config['UPLOAD_FOLDER'] = 'uploads'  # Create a folder named 'uploads' in your project directory
 #PATH = r"/home/pedrov/Downloads/kanban_quadro_model.xlsx"
 
 genai.configure(api_key=API_KEY)
@@ -251,9 +251,11 @@ class ChatbotServer:
         def home():
             return render_template("home.html")
 
-        @app.route('/uploads/<path:filename>')
-        def download_file(filename):
-            return send_from_directory('/app/', filename)
+        # Rota para servir o arquivo MP3 diretamente
+        @app.route('/static/<path:filename>')
+        def serve_static(filename):
+            return send_from_directory(os.path.join(app.root_path, 'static'), filename)
+
 
         @app.route("/chat", methods=["POST"])
         def chat():
