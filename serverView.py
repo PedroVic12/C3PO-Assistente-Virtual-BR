@@ -23,6 +23,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'  # Create a folder named 'uploads' in yo
 
 genai.configure(api_key=API_KEY)
 
+import pandas as pd
 
 class repository:
     def __init__(self):
@@ -35,7 +36,6 @@ class repository:
         return data_atual
 
     def get_df(self, path):
-        import pandas as pd
 
         df = pd.read_excel(path)
         # display(df) # type: ignore

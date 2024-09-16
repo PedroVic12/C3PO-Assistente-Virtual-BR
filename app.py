@@ -7,6 +7,7 @@ from google.api_core import gapic_v1
 from google.auth import credentials as ga_credentials
 import google.generativeai as genai
 from datetime import datetime
+from flask_cors import CORS
 
 #from dotenv import load_dotenv
 
@@ -20,7 +21,7 @@ DEFAULT_VOICE = "pt-BR-Wavenet-A"
 app = Flask(__name__, static_url_path="/static", static_folder="static", template_folder='templates')  # Servidor Flask
 app.config['UPLOAD_FOLDER'] = 'uploads'  # Create a folder named 'uploads' in your project directory
 #PATH = r"/home/pedrov/Downloads/kanban_quadro_model.xlsx"
-
+CORS(app)
 genai.configure(api_key=API_KEY)
 
 
@@ -251,7 +252,29 @@ class ChatbotServer:
         def home():
             return render_template("home.html")
 
-        # Rota para servir o arquivo MP3 diretamente
+        @app.route("/chatbot")
+        def chatbot():
+            return render_template("chatbot_template.html")
+
+
+        #! Rota para servir o arquivo MP3 diretamente
+        @app.route('/models', methods=['GET'])
+        def get_models():
+            # Sua lógica aqui
+            return jsonify(['gemini-pro', 'another-model'])
+        
+
+        @app.route('/chat_output', methods=['POST'])
+        def chat_output():
+            # Sua lógica aqui
+            data = request.json
+            # Processamento e resposta
+            return jsonify({
+                'conversation_history': data['conversation_history'] + [{'role': 'assistant', 'content': 'Resposta do assistente'}],
+                'audio_file': 'output.mp3'
+            })
+        
+
         @app.route('/static/<path:filename>')
         def serve_static(filename):
             return send_from_directory(os.path.join(app.root_path, 'static'), filename)
@@ -283,7 +306,7 @@ class ChatbotServer:
             )
 
         #app.run(debug=True)
-        app.run(host='0.0.0.0', port=8080)
+        app.run(host='0.0.0.0', port=9090)
 
 if __name__ == "__main__":
     server = ChatbotServer()
