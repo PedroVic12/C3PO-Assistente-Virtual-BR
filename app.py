@@ -255,6 +255,10 @@ class ChatbotServer:
         @app.route("/chatbot")
         def chatbot():
             return render_template("chatbot_template.html")
+        
+        @app.route("/loja")
+        def loja():
+            return render_template("eccomerce_page.html")
 
 
         #! Rota para servir o arquivo MP3 diretamente
