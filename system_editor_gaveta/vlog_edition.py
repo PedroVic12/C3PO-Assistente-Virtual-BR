@@ -1,6 +1,6 @@
-from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
+from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip, TextClip
 
-class VideoEditorWithImages:
+class VideoEditorWithImagesAndText:
     def __init__(self, video_file, output_file, fps=24):
         self.video_file = video_file
         self.output_file = output_file
@@ -8,51 +8,102 @@ class VideoEditorWithImages:
         self.video_clip = VideoFileClip(self.video_file)
         self.clips = [self.video_clip]  # O vídeo de fundo é o primeiro clip
 
-    def input_image_on_video(self, image_path, times, position):
+    def add_image_to_video(self, image_path, start_time, end_time, position):
         """
         Adiciona uma imagem sobre o vídeo com a duração e posição especificadas.
-        
         :param image_path: Caminho da imagem
-        :param times: [start_time, end_time] - Duração de exibição da imagem no vídeo
+        :param start_time: Início de exibição da imagem no vídeo (em segundos)
+        :param end_time: Fim de exibição da imagem no vídeo (em segundos)
         :param position: (x, y) - Coordenadas da posição da imagem sobre o vídeo
         """
-        start_time, end_time = times
         duration = end_time - start_time
-
-        # Cria o ImageClip com a duração apropriada
-        image_clip = ImageClip(image_path).set_duration(duration).set_position(position).set_start(start_time)
-        
-        # Ajusta o tamanho da imagem ao tamanho do vídeo
-        #image_clip = image_clip.resize(height=self.video_clip.h)  # Ajusta a altura da imagem para o vídeo
-        
-        # Adiciona o clip de imagem à lista de clips
+        image_clip = (ImageClip(image_path)
+                      .set_duration(duration)
+                      .set_position(position)
+                      .set_start(start_time))
         self.clips.append(image_clip)
-    
+
+    def add_gif_to_video(self, gif_path, start_time, end_time, position):
+        """
+        Adiciona um GIF animado sobre o vídeo com a duração e posição especificadas.
+        :param gif_path: Caminho do GIF
+        :param start_time: Início de exibição do GIF no vídeo (em segundos)
+        :param end_time: Fim de exibição do GIF no vídeo (em segundos)
+        :param position: (x, y) - Coordenadas da posição do GIF sobre o vídeo
+        """
+        duration = end_time - start_time
+        gif_clip = (VideoFileClip(gif_path)
+                    .subclip(0, duration)
+                    .set_position(position)
+                    .set_start(start_time))
+        self.clips.append(gif_clip)
+
+    def add_text_to_video(self, text, start_time, end_time, position, fontsize=50, color='white', font='Arial'):
+        """
+        Adiciona um texto sobre o vídeo com a duração e posição especificadas.
+        :param text: Texto a ser adicionado
+        :param start_time: Início de exibição do texto no vídeo (em segundos)
+        :param end_time: Fim de exibição do texto no vídeo (em segundos)
+        :param position: (x, y) - Coordenadas da posição do texto sobre o vídeo
+        :param fontsize: Tamanho da fonte
+        :param color: Cor do texto
+        :param font: Fonte do texto
+        """
+        duration = end_time - start_time
+        text_clip = (TextClip(text, fontsize=fontsize, color=color, font=font)
+                     .set_duration(duration)
+                     .set_position(position)
+                     .set_start(start_time))
+        self.clips.append(text_clip)
+
     def create_final_video(self):
-        """Cria o vídeo final com todas as imagens sobrepostas ao vídeo de fundo."""
+        """Cria o vídeo final com todas as imagens e textos sobrepostos ao vídeo de fundo."""
         final_clip = CompositeVideoClip(self.clips)
         final_clip.write_videofile(self.output_file, codec="libx264", fps=self.fps)
         print(f"Vídeo final salvo em {self.output_file}")
 
-# Parâmetros para o editor de vídeo
-path = r"/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/system_editor_gaveta/imagens"
 
-video_file = "C3PO-Assistente-Virtual-BR/system_editor_gaveta/videos/kanban_project.mp4"
-output_file = f"{path}/video_final_com_imagens.mp4"
+# Exemplo de uso
+if __name__ == "__main__":
+    path = "/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/system_editor_gaveta/imagens"
+    output_file = f"/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/system_editor_gaveta/output/video_final.mp4"
+    video_file = "/home/pedrov12/Downloads/new-ia-the-age2024_bvsoVoax.mp4"
+    img_path = "/home/pedrov12/Imagens/"
+    videos_path = "/home/pedrov12/Vídeos/"
 
+    video_file = "/home/pedrov12/Downloads/IA_the_age2024.mp4"
 
-# Criação do editor de vídeo
-editor = VideoEditorWithImages(video_file, output_file)
+    
+    # Criação do editor de vídeo
+    editor = VideoEditorWithImagesAndText(video_file, output_file)
 
-# Exemplo de imagens sobrepostas ao vídeo
-# 1ª Imagem: Na esquerda, aparece de 1.15s a 11.15s
-editor.input_image_on_video(f"/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/system_editor_gaveta/imagens/app_service.jpg", [1.15, 11.15], position=(editor.video_clip.w + 200, 'center'))
+    # Conversão de minutos e segundos para segundos absolutos
+    def time_in_seconds(minutes, seconds):
+        return minutes * 60 + seconds
 
-# 2ª Imagem: Na direita, aparece de 11.15s a 16.15s
-editor.input_image_on_video(f"{path}/dash.png", [11.15, 16.15], position=(editor.video_clip.w - 200, 'center'))
+    # Adicionando imagens e textos manualmente
+    editor.add_text_to_video("Explicação sobre o App Service", 
+                             start_time=time_in_seconds(2, 15), 
+                             end_time=time_in_seconds(2, 30), 
+                             position=("left", 'top'), 
+                             fontsize=40, color='white')
+    editor.add_gif_to_video(f"{videos_path}/ficando_feliz.gif", 
+                              start_time=time_in_seconds(2, 15), 
+                              end_time=time_in_seconds(2, 30), 
+                              position=("left", 'center'))  # Posição esquerda
 
-# 3ª Imagem: Ocupa ambas as laterais (centro), aparece de 16.15s a 21.15s
-editor.input_image_on_video(f"{path}/chabot_service.jpg", [16.15, 21.15], position=('center', 'center'))
+    # Exemplo: de 4min10s a 4min30s (250s a 270s) com a imagem e texto à direita
+    editor.add_text_to_video("Explicação sobre o Dashboard", 
+                             start_time=time_in_seconds(4, 10), 
+                             end_time=time_in_seconds(4, 30), 
+                             position=('left', 'top'), 
+                             fontsize=40, color='blue')
 
-# Criar o vídeo final
-editor.create_final_video()
+    editor.add_image_to_video(f"{path}/dash.png", 
+                              start_time=time_in_seconds(4, 10), 
+                              end_time=time_in_seconds(4, 30), 
+                              position=('left', 'center'))  # Posição direita
+
+    
+    # Criar o vídeo final
+    editor.create_final_video()

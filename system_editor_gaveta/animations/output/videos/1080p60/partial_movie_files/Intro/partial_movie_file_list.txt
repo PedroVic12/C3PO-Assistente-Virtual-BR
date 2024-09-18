@@ -1,0 +1,6 @@
+# This file is used internally by FFMPEG.
+file 'file:/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/system_editor_gaveta/animations/output/videos/1080p60/partial_movie_files/Intro/3977891868_435502160_223132457.mp4'
+file 'file:/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/system_editor_gaveta/animations/output/videos/1080p60/partial_movie_files/Intro/2852726489_2293822888_3454306776.mp4'
+file 'file:/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/system_editor_gaveta/animations/output/videos/1080p60/partial_movie_files/Intro/2852726489_1583541091_2850275336.mp4'
+file 'file:/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/system_editor_gaveta/animations/output/videos/1080p60/partial_movie_files/Intro/2852726489_1141282389_4269255579.mp4'
+file 'file:/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/system_editor_gaveta/animations/output/videos/1080p60/partial_movie_files/Intro/2852726489_3313916075_2389100663.mp4'
