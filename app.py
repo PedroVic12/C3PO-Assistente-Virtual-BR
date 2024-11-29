@@ -197,24 +197,18 @@ def chatbot():
 
         # Gerar áudio se voice_enabled for True
         audio_filename = None
-        if voice_enabled and response:
-            audio_path = chatbot_server.tts_system.text_to_speech(response)
-            if audio_path:
-                audio_filename = os.path.basename(audio_path)
+        if voice_enabled:
+            audio_filename = chatbot_server.tts_system.text_to_speech(response)
 
         return jsonify({
             'response': response,
             'conversation_history': updated_history,
-            'audio_file': audio_filename,
-            'success': True
+            'audio_file': audio_filename
         })
 
     except Exception as e:
         print(f"Erro no endpoint /api/chatbot: {str(e)}")
-        return jsonify({
-            'error': str(e),
-            'success': False
-        }), 500
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/speech-to-text', methods=['POST'])
 def speech_to_text():
@@ -223,21 +217,11 @@ def speech_to_text():
             return jsonify({'error': 'Nenhum arquivo de áudio fornecido'}), 400
         
         audio_file = request.files['audio']
-        
-        # Salvar o arquivo temporariamente
-        temp_dir = os.path.join(app.static_folder, 'temp')
-        os.makedirs(temp_dir, exist_ok=True)
-        temp_path = os.path.join(temp_dir, 'temp_audio.wav')
+        temp_path = os.path.join(chatbot_server.os_system.base_path, 'temp_audio.wav')
         audio_file.save(temp_path)
         
-        # Converter áudio para texto
         text = chatbot_server.os_system.speech_to_text(temp_path)
-        
-        # Limpar arquivo temporário
-        try:
-            os.remove(temp_path)
-        except:
-            pass
+        os.remove(temp_path)
         
         if text:
             return jsonify({'text': text})
@@ -250,7 +234,7 @@ def speech_to_text():
 
 @app.route('/static/mp3/<path:filename>')
 def serve_audio(filename):
-    return send_from_directory(os.path.join(app.static_folder, 'mp3'), filename)
+    return send_from_directory(os.path.join(chatbot_server.os_system.base_path, 'mp3'), filename)
 
 if __name__ == '__main__':
     app.run(debug=True, port=9999, host='0.0.0.0')

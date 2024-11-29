@@ -3,17 +3,73 @@ import csv
 import json
 import datetime
 import speech_recognition as sr
-from elevenlabs import Voice, VoiceSettings, play, stream
-from elevenlabs.client import ElevenLabs
-import requests
-import shutil
-from pathlib import Path
+import pyttsx3
+import uuid
+from datetime import datetime
+
+class TextToSpeech:
+    def __init__(self):
+        try:
+            self.engine = pyttsx3.init()
+            self.setup_voice()
+            self.base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'mp3')
+            os.makedirs(self.base_path, exist_ok=True)
+        except Exception as e:
+            print(f"Error initializing text-to-speech: {str(e)}")
+            self.engine = None
+
+    def setup_voice(self):
+        if not self.engine:
+            return
+            
+        try:
+            voices = self.engine.getProperty('voices')
+            # Try to find a Portuguese voice
+            pt_voice = None
+            for voice in voices:
+                if 'brazil' in voice.name.lower() or 'pt' in voice.name.lower():
+                    pt_voice = voice
+                    break
+                    
+            if pt_voice:
+                self.engine.setProperty('voice', pt_voice.id)
+            
+            # Configure voice properties
+            self.engine.setProperty('rate', 150)  # Speed
+            self.engine.setProperty('volume', 1.0)  # Volume
+        except Exception as e:
+            print(f"Error setting up voice: {str(e)}")
+
+    def text_to_speech(self, text):
+        if not self.engine:
+            print("Text-to-speech engine not initialized")
+            return None
+            
+        try:
+            # Generate unique filename
+            filename = f"speech_{uuid.uuid4().hex[:8]}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp3"
+            filepath = os.path.join(self.base_path, filename)
+            
+            # Save audio to file
+            self.engine.save_to_file(text, filepath)
+            self.engine.runAndWait()
+            
+            # Verify file was created
+            if os.path.exists(filepath):
+                return filename
+            else:
+                print("Audio file was not created")
+                return None
+                
+        except Exception as e:
+            print(f"Error converting text to speech: {str(e)}")
+            return None
 
 class OSystem:
     def __init__(self):
-        self.base_path = "/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/static"
-        self.ensure_directories()
         self.recognizer = sr.Recognizer()
+        self.base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static')
+        os.makedirs(self.base_path, exist_ok=True)
 
     def ensure_directories(self):
         """Ensure all necessary directories exist"""
@@ -70,11 +126,10 @@ class OSystem:
             print(f"Error listing files: {e}")
             return []
 
-    def speech_to_text(self, audio_file=None):
-        """Convert speech to text from microphone or audio file"""
+    def speech_to_text(self, audio_path=None):
         try:
-            if audio_file:
-                with sr.AudioFile(audio_file) as source:
+            if audio_path:
+                with sr.AudioFile(audio_path) as source:
                     audio = self.recognizer.record(source)
             else:
                 with sr.Microphone() as source:
@@ -86,52 +141,6 @@ class OSystem:
             return text
         except Exception as e:
             print(f"Error in speech recognition: {e}")
-            return None
-
-class TextToSpeech:
-    def __init__(self):
-        self.API_KEY = "0c76ddcdc2d1aace04fda8e819f8b1ac"
-        self.CHUNK_SIZE = 1024
-        self.VOICE_ID = "JBFqnCBsd6RMkjVDRZzb"
-        self.output_dir = "/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/static/mp3"
-
-    def text_to_speech(self, text, filename=None):
-        """Convert text to speech and save as MP3"""
-        if filename is None:
-            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"speech_{timestamp}.mp3"
-
-        output_path = os.path.join(self.output_dir, filename)
-
-        tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{self.VOICE_ID}/stream"
-        headers = {
-            "Accept": "application/json",
-            "xi-api-key": self.API_KEY
-        }
-        data = {
-            "text": text,
-            "model_id": "eleven_multilingual_v2",
-            "voice_settings": {
-                "stability": 0.5,
-                "similarity_boost": 0.8,
-                "style": 0.0,
-                "use_speaker_boost": True
-            }
-        }
-
-        try:
-            response = requests.post(tts_url, headers=headers, json=data, stream=True)
-            if response.ok:
-                with open(output_path, "wb") as f:
-                    for chunk in response.iter_content(chunk_size=self.CHUNK_SIZE):
-                        f.write(chunk)
-                print(f"Audio saved as: {output_path}")
-                return output_path
-            else:
-                print(f"Error: {response.text}")
-                return None
-        except Exception as e:
-            print(f"Error in text to speech conversion: {e}")
             return None
 
 # Example usage
