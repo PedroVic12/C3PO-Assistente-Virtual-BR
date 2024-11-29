@@ -202,6 +202,8 @@ class AssistenteGenAI:
 class ChatbotServer:
     def __init__(self):
         self.assistente = AssistenteGenAI()
+        self.tts_system = TextToSpeech()
+        self.os_system = OSystem()
 
     def list_models(self):
         return [DEFAULT_MODEL]
@@ -215,29 +217,6 @@ class ChatbotServer:
             {"role": "assistant", "content": assistant_response}
         )
         return assistant_response, conversation_history
-
-    def text_to_speechGoogle(self, text, voice=DEFAULT_VOICE):
-        try:
-            headers = {
-                "Authorization": f"Bearer {API_KEY}",
-                "Content-Type": "application/json",
-            }
-            data = {"model": "tts-1", "input": text, "voice": voice}
-            response = requests.post(
-                f"{BASE_URL}/audio/speech", headers=headers, json=data
-            )
-            response.raise_for_status()
-
-            # Save the audio to a file
-            filename = f"{hash(text)}.mp3"
-            filepath = os.path.join(app.static_folder, filename)
-            with open(filepath, "wb") as f:
-                f.write(response.content)
-
-            return filename
-        except requests.RequestException as e:
-            print(f"An error occurred while generating speech: {e}")
-            return None
 
     def run(self):
         @app.route("/", methods=["GET"])
@@ -254,24 +233,39 @@ class ChatbotServer:
                 DEFAULT_MODEL, user_input, conversation_history
             )
 
-            # Generate speech from the response
-            audio_file = (
-                self.text_to_speechGoogle(response)
-                if data.get("voice_enabled", True)
-                else None
-            )
-            return jsonify(
-                {
-                    "response": response,
-                    "conversation_history": updated_history,
-                    "audio_file": audio_file,
-                }
-            )
+            # Generate speech using ElevenLabs
+            if data.get("voice_enabled", True):
+                audio_file = self.tts_system.text_to_speech(response)
+                if audio_file:
+                    # Get just the filename from the full path
+                    audio_filename = os.path.basename(audio_file)
+                else:
+                    audio_filename = None
+            else:
+                audio_filename = None
 
-        # Serve static files from the frontend build
-        @app.route('/<path:path>')
-        def serve_static(path):
-            return send_from_directory('frontend/dist', path)
+            return jsonify({
+                "response": response,
+                "conversation_history": updated_history,
+                "audio_file": audio_filename
+            })
+
+        @app.route('/speech-to-text', methods=['POST'])
+        def speech_to_text():
+            if 'audio' not in request.files:
+                return jsonify({'error': 'No audio file provided'}), 400
+            
+            audio_file = request.files['audio']
+            
+            try:
+                text = self.os_system.speech_to_text(audio_file)
+                return jsonify({'text': text})
+            except Exception as e:
+                return jsonify({'error': str(e)}), 500
+
+        @app.route('/static/<path:filename>')
+        def serve_static(filename):
+            return send_from_directory('static', filename)
 
         app.run(debug=True, port=9999, host='0.0.0.0')
 

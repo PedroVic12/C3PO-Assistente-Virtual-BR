@@ -1,212 +1,202 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C3PO Assistente Pessoal</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
-
+    <title>C-3PO Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #2d2d2d;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            padding: 20px;
+        }
+        .messages {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #4a4a4a;
+            margin-left: 20%;
+        }
+        .bot-message {
+            background-color: #3a3a3a;
+            margin-right: 20%;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3a3a3a;
+            color: #fff;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ffd700;
+            color: #000;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ffed4a;
+        }
+    </style>
 </head>
-
 <body>
-    <div id="root"></div>
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Digite sua mensagem..." />
+            <button onclick="sendMessage()">Enviar</button>
+            <button onclick="toggleVoice()" id="voice-btn">🎤</button>
+        </div>
+    </div>
 
+    <script>
+        let messages = [];
+        let isListening = false;
 
+        // Add initial bot message
+        addMessage("Olá! Eu sou o C3PO, como posso ajudar?", true);
 
-    <!-- <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>  -->
+        function addMessage(text, isBot) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isBot ? 'bot-message' : 'user-message'}`;
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            messages.push({ text, isBot });
+        }
 
-    
-    
-    
-    <script type="text/babel">
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            if (!text) return;
 
+            addMessage(text, false);
+            input.value = '';
 
-        // import React from 'react'
-        
-    /*  import {createRoot} from 'react-dom/client'
-        import Markdown from 'react-markdown'
-        import remarkGfm from 'remark-gfm'
+            try {
+                const response = await fetch('/chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_input: text,
+                        conversation_history: messages.map(msg => ({
+                            role: msg.isBot ? 'assistant' : 'user',
+                            content: msg.text
+                        })),
+                        voice_enabled: true
+                    }),
+                });
 
-        const markdown = `Just a link: www.nasa.gov.`
+                const data = await response.json();
+                addMessage(data.response, true);
 
-        createRoot(document.body).render(
-          <Markdown remarkPlugins={[remarkGfm]}>{markdown}</Markdown>
-        )
-    */
-
-    
-
-
-
-        class ChatbotUser extends React.Component {
-            constructor(props) {
-                super(props);
-                this.state = {
-                    userInput: '',
-                    conversationHistory: [{ role: 'system', content: 'Você é um assistente atencioso.' }],
-                    models: [],
-                    selectedModel: 'gemini-pro', // Default model
-                    voiceEnabled: true,
-                    audioFile: "/static/output.mp"
-                };
-            }
-
-            componentDidMount() {
-                this.fetchModels();
-            }
-
-            fetchModels = async () => {
-                try {
-                    const response = await axios.get('/models');
-                    this.setState({ models: response.data });
-                } catch (error) {
-                    console.error('Erro ao buscar modelos:', error);
+                if (data.audio_file) {
+                    const audio = new Audio(`/static/mp3/${data.audio_file}`);
+                    audio.play();
                 }
-            };
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Desculpe, ocorreu um erro ao processar sua mensagem.', true);
+            }
+        }
 
-            handleInputChange = (event) => {
-                this.setState({ userInput: event.target.value });
-            };
+        // Handle Enter key
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
 
-            handleModelChange = (event) => {
-                this.setState({ selectedModel: event.target.value });
-            };
+        // Voice input functionality
+        function toggleVoice() {
+            const voiceBtn = document.getElementById('voice-btn');
+            if (!isListening) {
+                startListening();
+                voiceBtn.style.backgroundColor = '#ff4444';
+            } else {
+                stopListening();
+                voiceBtn.style.backgroundColor = '#ffd700';
+            }
+            isListening = !isListening;
+        }
 
-            toggleVoice = () => {
-                this.setState(prevState => ({ voiceEnabled: !prevState.voiceEnabled }));
-            };
+        let mediaRecorder;
+        let audioChunks = [];
 
-            sendMessage = async () => {
-                const { userInput, conversationHistory, selectedModel, voiceEnabled } = this.state;
-                if (userInput.trim() !== '') {
-                    this.setState(prevState => ({
-                        conversationHistory: [...prevState.conversationHistory, { role: 'user', content: userInput }],
-                        userInput: ''
-                    }));
+        async function startListening() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob);
 
                     try {
-                        const response = await axios.post('/chat', {
-                            model: selectedModel,
-                            user_input: userInput,
-                            conversation_history: conversationHistory,
-                            voice_enabled: voiceEnabled
+                        const response = await fetch('/speech-to-text', {
+                            method: 'POST',
+                            body: formData
                         });
 
-                        this.setState(prevState => ({
-                            conversationHistory: response.data.conversation_history,
-                            audioFile: response.data.audio_file
-                        }));
-
-                        if (voiceEnabled && this.state.audioFile) {
-                            const audio = new Audio(`/audio/${this.state.audioFile}`);
-                            audio.play();
+                        const data = await response.json();
+                        if (data.text) {
+                            document.getElementById('user-input').value = data.text;
+                            sendMessage();
                         }
                     } catch (error) {
-                        console.error('Erro ao enviar mensagem:', error);
+                        console.error('Error converting speech to text:', error);
                     }
-                }
-            };
 
-            render() {
-                const { userInput, conversationHistory, models, selectedModel, voiceEnabled } = this.state;
-                return (
-                    <div className="container">
+                    audioChunks = [];
+                };
 
-                        <h1>Assistente de Pedro Victor Veras C3PO! Tdah, produtividade, rotinas e treinos!</h1>
-                        <div>
-                            <img src="https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif" alt="Description of the GIF" />
-                        
-                            <figure>
-                              <figcaption>Ouça o áudio gerado:</figcaption>
-                              <audio id="audioDownload" controls src="{{ url_for('static', filename='output.mp3') }}"></audio>
-                              <a href="{{ url_for('static', filename='output.mp3') }}">Baixar áudio</a>
-                            </figure>
-                        </div>
-
-
-                        <select id="model-select" value={selectedModel} onChange={this.handleModelChange}>
-                            {models.map(model => (
-                                <option key={model} value={model}>{model}</option>
-                            ))}
-                        </select>
-                        <button id="voice-toggle" className={voiceEnabled ? '' : 'off'} onClick={this.toggleVoice}>
-                            Voz: {voiceEnabled ? 'Ligada' : 'Desligada'}
-                        </button>
-
-
-
-
-                       
-                        <div id="chat-history">
-                            {conversationHistory.map((message, index) => (
-                                <div key={index} className={`message ${message.role === 'user' ? 'user-message' : 'assistant-message'}`}>
-                                    <strong>{message.role === 'user' ? 'Você' : 'Assistente'}:</strong> {message.content}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="input-area">
-                            <input
-                                type="text"
-                                id="user-input"
-                                placeholder="Digite sua mensagem..."
-                                value={userInput}
-                                onChange={this.handleInputChange}
-                                onKeyPress={event => event.key === 'Enter' && this.sendMessage()}
-                            />
-                            <button id="send-button" onClick={this.sendMessage}>Enviar</button>
-                        </div>
-
-
-
-                    </div>
-                );
+                mediaRecorder.start();
+                console.log('Started recording...');
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
             }
         }
 
-        class App extends React.Component {
-            render() {
-                return (
-
-
-                    <ChatbotUser />
-                );
+        function stopListening() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                console.log('Stopped recording...');
             }
         }
-
-        ReactDOM.render(<App />, document.getElementById('root'));
-
-
-    // manipulando o audio gerado
-    const audioPlayer = document.getElementById('audioPlayer');
-    let lastModified = 0;
-
-    function checkAudioUpdate() {
-      fetch('{{ url_for("static", filename="output.mp3") }}', { method: 'HEAD' })
-        .then(response => {
-          if (response.ok) {
-            const newLastModified = Date.parse(response.headers.get('Last-Modified'));
-            if (newLastModified > lastModified) {
-              lastModified = newLastModified;
-              audioPlayer.load(); // Recarregar o áudio
-              audioPlayer.play(); // Reproduzir o áudio automaticamente
-            }
-          }
-        })
-        .catch(error => {
-          console.error('Erro ao verificar atualização do áudio:', error);
-        });
-    }
-
-    // Verificar a atualização do áudio a cada 5 segundos
-    //setInterval(checkAudioUpdate, 5000); 
     </script>
 </body>
-
 </html>
