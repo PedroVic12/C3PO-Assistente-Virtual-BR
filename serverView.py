@@ -240,28 +240,18 @@ class ChatbotServer:
             return None
 
     def run(self):
-        @app.route("/",methods=["GET"])
+        @app.route("/", methods=["GET"])
         def index():
             return send_from_directory('frontend/dist', 'index.html')
 
-        @app.route("/<path:path>")
-        def serve_static_files(path):
-            return send_from_directory('frontend/dist', path)
-
-        @app.route("/api/models", methods=["GET"])
-        def get_models():
-            models = self.list_models()
-            return jsonify({"models": models})
-
-        @app.route("/api/chat", methods=["POST"])
-        def chat():
+        @app.route("/chatbot", methods=["POST"])
+        def chatbot():
             data = request.json
-            model = data.get("model", DEFAULT_MODEL)
             user_input = data.get("user_input", "")
             conversation_history = data.get("conversation_history", [])
 
             response, updated_history = self.chat_with_model(
-                model, user_input, conversation_history
+                DEFAULT_MODEL, user_input, conversation_history
             )
 
             # Generate speech from the response
@@ -277,6 +267,11 @@ class ChatbotServer:
                     "audio_file": audio_file,
                 }
             )
+
+        # Serve static files from the frontend build
+        @app.route('/<path:path>')
+        def serve_static(path):
+            return send_from_directory('frontend/dist', path)
 
         app.run(debug=True, port=9999, host='0.0.0.0')
 

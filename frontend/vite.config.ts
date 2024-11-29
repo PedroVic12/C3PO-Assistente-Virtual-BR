@@ -7,10 +7,14 @@ export default defineConfig({
   server: {
     port: 8888,
     proxy: {
-      '/api': {
+      '/chatbot': {
         target: 'http://localhost:9999',
         changeOrigin: true,
       },
+      '/static': {
+        target: 'http://localhost:9999',
+        changeOrigin: true,
+      }
     },
   },
   build: {

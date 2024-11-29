@@ -41,7 +41,7 @@ export function ChatInterface() {
     setIsThinking(true);
     
     try {
-      const response = await fetch(`${API_URL}/chat`, {
+      const response = await fetch('/chatbot', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
