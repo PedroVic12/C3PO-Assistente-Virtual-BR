@@ -24,7 +24,7 @@ mkdir -p static
 
 # Start Flask backend with PM2
 echo "Starting Flask backend..."
-pm2 start "python serverView.py" --name "c3po-backend"
+pm2 start "python app.py" --name "c3po-backend"
 
 # Start React development server with PM2
 echo "Starting React frontend..."

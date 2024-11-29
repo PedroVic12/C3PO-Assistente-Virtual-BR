@@ -8,79 +8,27 @@ from google.auth import credentials as ga_credentials
 import google.generativeai as genai
 from datetime import datetime
 from flask_cors import CORS
+from src.voice_assistente import OSystem, TextToSpeech
 
-#from dotenv import load_dotenv
-
-#load_dotenv()
-
-API_KEY = "AIzaSyCZhKI6vWIAK0GkzXajc-PUjTBEO5zjoeA"
+API_KEY = "AIzaSyAxDCA2uS0OGqDZkaGJ0C-TNPQcllywwhg"
 BASE_URL = "https://api.generativeai.google.com/v1beta2"
 DEFAULT_MODEL = "gemini-pro"
 DEFAULT_VOICE = "pt-BR-Wavenet-A"
 
-app = Flask(__name__, static_url_path="/static", static_folder="static", template_folder='templates')  # Servidor Flask
-app.config['UPLOAD_FOLDER'] = 'uploads'  # Create a folder named 'uploads' in your project directory
-#PATH = r"/home/pedrov/Downloads/kanban_quadro_model.xlsx"
-CORS(app)
+app = Flask(__name__, static_url_path="/static", static_folder="static", template_folder='templates')
+app.config['UPLOAD_FOLDER'] = 'uploads'
+
+CORS(app, resources={r"/*": {"origins": "*"}})
+
 genai.configure(api_key=API_KEY)
 
+texto = f"Atualmente estou seguindo uma rotina de 9h de foco, 8h de sono, 1h de treino(2 ou 3 por dia), Trabalho focado em programacao, aplciativos, sistemas web e modelos de AI com visao computacional (6h), Estudus em  engenharia eletrica com circuitos eletricos, eletromag, cricuitos digitais, economia e sistemas de potencia 2h, com meditacoes, alongamentos e treinos intercalado com foco."
 
-class repository:
-    def __init__(self):
-
-        pass
-
-    def get_dataAtual(self):
-
-        data_atual = datetime.now()
-        return data_atual
-
-    def get_df(self, path):
-        import pandas as pd
-
-        df = pd.read_excel(path)
-        # display(df) # type: ignore
-        # print(df)
-        return df
-
-    def connect_gemini(
-        self,
-    ):
-        # Função que tem como função enviar arquivos com contexto certo e formato para o gemini ler
-
-        quadro = self.get_df(PATH)
-        # convertendo dataframe para dicionario
-        quadro_dict = quadro.to_dict("records")
-        data_atual = self.get_dataAtual()
-        print("Esse é seu quadro de horarios 2024")
-        # print(f" dia : {data_atual} - para quadro: {quadro} ")
-        return data_atual, quadro_dict
-
-
-repo = repository()
-#quadro = repo.connect_gemini()
-
-#texto = f" Atualmente estou seguindo este quadro para ser kanban : {quadro}"
-
-texto = f"Atualmente estou seguindo uma rotina de 9h de foco, 8h de sono, 1h de treino(2 ou 3 por dia), Trabalho focado (6h), Estudis em 2h, com meditacoes, alongamentos e treinos intercalado com foco."
-
-historico_c3po = history = [
+historico_c3po = [
     {
         "role": "user",
         "parts": [
             "voce é c3po assistente pessoal mestre em relaçoes humanas do universo do star wars GUERRA NAS ESTRELAS e eu sou seu mestre Pedro, amigo de Anakin Skywalker e estou em treinamento JEDI no momento. Sou tambem ESTUDANTE, DESENVOLVEDOR,CALISTENICO,KARATECA,EMPREENDEDROR"
-        ],
-    },
-    {
-        "role": "model",
-        "parts": [
-            "Oh, Mestre Pedro! É uma honra servi-lo. Como posso ser útil neste dia glorioso? Espero que o treinamento Jedi esteja indo bem. Você precisa de assistência com sua nave, um protocolo específico, ou talvez apenas deseja discutir os mistérios da Força? Estou à sua disposição."
-        ],
-    },
-    {
-        "role": "user",
-        "parts": [
-            "Não me chame de filósofo maluco, pote de graxa barrigudo.Meu obtuso amigo, se precisassem da nossa ajuda, teriam pedido. Tem muito a aprender sobre o comportamento humano.Eu sugiro uma nova estratégia, R2: deixe o Wookie ganhar.Oh, meu Deus! Desligue-me! Máquinas fazendo máquinas. Que maldade!Olá. Eu não acredito que fomos apresentados. R2-D2? Prazer em conhecê-lo. Sou C-3PO, Relações Humano-Ciborgue.\n\nessa sao umas das suas frases favoritas que voce ja disse durante sua jornada"
         ],
     },
     {
@@ -145,16 +93,15 @@ historico_c3po = history = [
     {
         "role": "model",
         "parts": [
-            "Com certeza, mestre Pedro, sempre serei objetivos com respostas em com muito espacos e topicos de ate 200 palavras"
+            "Com certeza, mestre Pedro, sempre serei objetivos com respostas em formato de topicos e em formato mardown com bastante negrito com ate 200 palavras"
         ],
     },
 ]
 
-
 class AssistenteGenAI:
     def __init__(self):
         generation_config = genai.types.GenerationConfig(
-            temperature=0.5,
+            temperature=0.3,
             top_k=40,
             top_p=0.95,
             candidate_count=1,
@@ -183,135 +130,127 @@ class AssistenteGenAI:
             safety_settings=safety_settings,
         )
 
-    def responder(
-        self,
-        user_input,
-    ):
+    def responder(self, user_input):
         try:
             chat = self.model.start_chat(history=historico_c3po)
             chat.send_message(user_input)
             texto = chat.last.text
-            return texto
+            return {
+                'thinking': False,
+                'response': texto,
+                'success': True
+            }
         except Exception as e:
             print("Erro ao responder", e)
-            return "Desculpe, ocorreu um erro ao processar sua solicitação."
-
+            return {
+                'thinking': False,
+                'response': "Desculpe, ocorreu um erro ao processar sua solicitação.",
+                'success': False
+            }
 
 class ChatbotServer:
     def __init__(self):
         self.assistente = AssistenteGenAI()
+        self.tts_system = TextToSpeech()
+        self.os_system = OSystem()
+        self.ensure_directories()
 
-    def list_models(self):
-        return [DEFAULT_MODEL]
+    def ensure_directories(self):
+        """Ensure all necessary directories exist"""
+        directories = ['static', 'static/mp3', 'static/temp']
+        for directory in directories:
+            os.makedirs(directory, exist_ok=True)
 
     def chat_with_model(self, model, user_input, conversation_history):
-        conversation_history.append({"role": "user", "content": user_input})
-        assistant_response = self.assistente.responder(
-            user_input,
-        )
-        conversation_history.append(
-            {"role": "assistant", "content": assistant_response}
-        )
-        return assistant_response, conversation_history
-
-    def text_to_speechGoogle(self, text, voice=DEFAULT_VOICE):
         try:
-            headers = {
-                "Authorization": f"Bearer {API_KEY}",
-                "Content-Type": "application/json",
-            }
-            data = {"model": "tts-1", "input": text, "voice": voice}
-            response = requests.post(
-                f"{BASE_URL}/audio/speech", headers=headers, json=data
-            )
-            response.raise_for_status()
+            response_data = self.assistente.responder(user_input)
+            if response_data['success']:
+                conversation_history.append({"role": "user", "content": user_input})
+                conversation_history.append({"role": "assistant", "content": response_data['response']})
+            return response_data['response'], conversation_history
+        except Exception as e:
+            print(f"Erro ao processar chat: {str(e)}")
+            return "Desculpe, ocorreu um erro ao processar sua mensagem.", conversation_history
 
-            # Save the audio to a file
-            filename = f"{hash(text)}.mp3"
-            filepath = os.path.join(app.static_folder, filename)
-            with open(filepath, "wb") as f:
-                f.write(response.content)
+# Instância global do ChatbotServer
+chatbot_server = ChatbotServer()
 
-            return filename
-        except requests.RequestException as e:
-            print(f"An error occurred while generating speech: {e}")
-            return None
+@app.route("/", defaults={'path': ''})
+@app.route("/<path:path>")
+def serve_react(path):
+    if path and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    return render_template("index.html")
 
-    def run(self):
-        @app.route("/",methods=["GET"])
-        def index():
-            models = self.list_models()
-            print("\nModelos Disponiveis: ", models)
-            return render_template(
-                "index.html",
-                models=models,
-                default_model=DEFAULT_MODEL,
-            )
+@app.route('/api/chatbot', methods=['POST'])
+def chatbot():
+    try:
+        data = request.json
+        user_input = data.get('user_input', '')
+        conversation_history = data.get('conversation_history', [])
+        voice_enabled = data.get('voice_enabled', True)
 
-        @app.route("/home")
-        def home():
-            return render_template("home.html")
+        # Gerar resposta do modelo
+        response, updated_history = chatbot_server.chat_with_model(
+            DEFAULT_MODEL, user_input, conversation_history
+        )
 
-        @app.route("/chatbot")
-        def chatbot():
-            return render_template("chatbot_template.html")
+        # Gerar áudio se voice_enabled for True
+        audio_filename = None
+        if voice_enabled and response:
+            audio_path = chatbot_server.tts_system.text_to_speech(response)
+            if audio_path:
+                audio_filename = os.path.basename(audio_path)
+
+        return jsonify({
+            'response': response,
+            'conversation_history': updated_history,
+            'audio_file': audio_filename,
+            'success': True
+        })
+
+    except Exception as e:
+        print(f"Erro no endpoint /api/chatbot: {str(e)}")
+        return jsonify({
+            'error': str(e),
+            'success': False
+        }), 500
+
+@app.route('/api/speech-to-text', methods=['POST'])
+def speech_to_text():
+    try:
+        if 'audio' not in request.files:
+            return jsonify({'error': 'Nenhum arquivo de áudio fornecido'}), 400
         
-        @app.route("/loja")
-        def loja():
-            return render_template("eccomerce_page.html")
-
-
-        #! Rota para servir o arquivo MP3 diretamente
-        @app.route('/models', methods=['GET'])
-        def get_models():
-            # Sua lógica aqui
-            return jsonify(['gemini-pro', 'another-model'])
+        audio_file = request.files['audio']
         
-
-        @app.route('/chat_output', methods=['POST'])
-        def chat_output():
-            # Sua lógica aqui
-            data = request.json
-            # Processamento e resposta
-            return jsonify({
-                'conversation_history': data['conversation_history'] + [{'role': 'assistant', 'content': 'Resposta do assistente'}],
-                'audio_file': 'output.mp3'
-            })
+        # Salvar o arquivo temporariamente
+        temp_dir = os.path.join(app.static_folder, 'temp')
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_path = os.path.join(temp_dir, 'temp_audio.wav')
+        audio_file.save(temp_path)
         
+        # Converter áudio para texto
+        text = chatbot_server.os_system.speech_to_text(temp_path)
+        
+        # Limpar arquivo temporário
+        try:
+            os.remove(temp_path)
+        except:
+            pass
+        
+        if text:
+            return jsonify({'text': text})
+        else:
+            return jsonify({'error': 'Não foi possível reconhecer o áudio'}), 400
 
-        @app.route('/static/<path:filename>')
-        def serve_static(filename):
-            return send_from_directory(os.path.join(app.root_path, 'static'), filename)
+    except Exception as e:
+        print(f"Erro no endpoint /speech-to-text: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
+@app.route('/static/mp3/<path:filename>')
+def serve_audio(filename):
+    return send_from_directory(os.path.join(app.static_folder, 'mp3'), filename)
 
-        @app.route("/chat", methods=["POST"])
-        def chat():
-            data = request.json
-            model = data.get("model", DEFAULT_MODEL)
-            user_input = data.get("user_input", "")
-            conversation_history = data.get("conversation_history", [])
-
-            response, updated_history = self.chat_with_model(
-                model, user_input, conversation_history
-            )
-
-            # Generate speech from the response
-            audio_file = (
-                self.text_to_speechGoogle(response)
-                if data.get("voice_enabled", True)
-                else None
-            )
-            return jsonify(
-                {
-                    "response": response,
-                    "conversation_history": updated_history,
-                    "audio_file": audio_file,
-                }
-            )
-
-        #app.run(debug=True)
-        app.run(host='0.0.0.0', port=9090)
-
-if __name__ == "__main__":
-    server = ChatbotServer()
-    server.run()
+if __name__ == '__main__':
+    app.run(debug=True, port=9999, host='0.0.0.0')

@@ -8,14 +8,12 @@ from google.auth import credentials as ga_credentials
 import google.generativeai as genai
 from datetime import datetime
 from flask_cors import CORS
-from src.voice_assistente import OSystem, TextToSpeech
-#from c3po_gemini_api import FreelanceManager
 
 #from dotenv import load_dotenv
 
 #load_dotenv()
 
-API_KEY = "AIzaSyAxDCA2uS0OGqDZkaGJ0C-TNPQcllywwhg"
+API_KEY = "AIzaSyCZhKI6vWIAK0GkzXajc-PUjTBEO5zjoeA"
 BASE_URL = "https://api.generativeai.google.com/v1beta2"
 DEFAULT_MODEL = "gemini-pro"
 DEFAULT_VOICE = "pt-BR-Wavenet-A"
@@ -23,12 +21,9 @@ DEFAULT_VOICE = "pt-BR-Wavenet-A"
 app = Flask(__name__, static_url_path="/static", static_folder="static", template_folder='templates')  # Servidor Flask
 app.config['UPLOAD_FOLDER'] = 'uploads'  # Create a folder named 'uploads' in your project directory
 #PATH = r"/home/pedrov/Downloads/kanban_quadro_model.xlsx"
-
-CORS(app, resources={r"/*": {"origins": "*"}})  # Enable CORS for all routes
-
+CORS(app)
 genai.configure(api_key=API_KEY)
 
-import pandas as pd
 
 class repository:
     def __init__(self):
@@ -41,6 +36,7 @@ class repository:
         return data_atual
 
     def get_df(self, path):
+        import pandas as pd
 
         df = pd.read_excel(path)
         # display(df) # type: ignore
@@ -66,7 +62,7 @@ repo = repository()
 
 #texto = f" Atualmente estou seguindo este quadro para ser kanban : {quadro}"
 
-texto = f"Atualmente estou seguindo uma rotina de 9h de foco, 8h de sono, 1h de treino(2 ou 3 por dia), Trabalho focado em programacao, aplciativos, sistemas web e modelos de AI com visao computacional (6h), Estudus em  engenharia eletrica com circuitos eletricos, eletromag, cricuitos digitais, economia e sistemas de potencia 2h, com meditacoes, alongamentos e treinos intercalado com foco."
+texto = f"Atualmente estou seguindo uma rotina de 9h de foco, 8h de sono, 1h de treino(2 ou 3 por dia), Trabalho focado (6h), Estudis em 2h, com meditacoes, alongamentos e treinos intercalado com foco."
 
 historico_c3po = history = [
     {
@@ -158,7 +154,7 @@ historico_c3po = history = [
 class AssistenteGenAI:
     def __init__(self):
         generation_config = genai.types.GenerationConfig(
-            temperature=0.3,
+            temperature=0.5,
             top_k=40,
             top_p=0.95,
             candidate_count=1,
@@ -204,9 +200,6 @@ class AssistenteGenAI:
 class ChatbotServer:
     def __init__(self):
         self.assistente = AssistenteGenAI()
-        self.tts_system = TextToSpeech()
-        self.os_system = OSystem()
-        #self.freelance_manager = FreelanceManager()
 
     def list_models(self):
         return [DEFAULT_MODEL]
@@ -221,94 +214,104 @@ class ChatbotServer:
         )
         return assistant_response, conversation_history
 
+    def text_to_speechGoogle(self, text, voice=DEFAULT_VOICE):
+        try:
+            headers = {
+                "Authorization": f"Bearer {API_KEY}",
+                "Content-Type": "application/json",
+            }
+            data = {"model": "tts-1", "input": text, "voice": voice}
+            response = requests.post(
+                f"{BASE_URL}/audio/speech", headers=headers, json=data
+            )
+            response.raise_for_status()
+
+            # Save the audio to a file
+            filename = f"{hash(text)}.mp3"
+            filepath = os.path.join(app.static_folder, filename)
+            with open(filepath, "wb") as f:
+                f.write(response.content)
+
+            return filename
+        except requests.RequestException as e:
+            print(f"An error occurred while generating speech: {e}")
+            return None
+
     def run(self):
-        # Add routes for Google Sheets API
-        #setup_routes(app, self.freelance_manager)
+        @app.route("/",methods=["GET"])
+        def index():
+            models = self.list_models()
+            print("\nModelos Disponiveis: ", models)
+            return render_template(
+                "index.html",
+                models=models,
+                default_model=DEFAULT_MODEL,
+            )
 
-        @app.route("/", defaults={'path': ''})
-        @app.route("/<path:path>")
-        def serve_react(path):
-            if path and os.path.exists(os.path.join(app.static_folder, path)):
-                return send_from_directory(app.static_folder, path)
-            return render_template("index.html")
+        @app.route("/home")
+        def home():
+            return render_template("home.html")
 
-        @app.route('/api/chatbot', methods=['POST'])
+        @app.route("/chatbot")
         def chatbot():
-            try:
-                data = request.json
-                user_input = data.get('user_input', '')
-                conversation_history = data.get('conversation_history', [])
-                voice_enabled = data.get('voice_enabled', True)
-
-                # Gerar resposta do modelo
-                response, updated_history = chatbot_server.chat_with_model(
-                    DEFAULT_MODEL, user_input, conversation_history
-                )
-
-                # Gerar áudio se voice_enabled for True
-                audio_filename = None
-                if voice_enabled:
-                    audio_path = chatbot_server.tts_system.text_to_speech(response)
-                    if audio_path:
-                        audio_filename = os.path.basename(audio_path)
-
-                return jsonify({
-                    'response': response,
-                    'conversation_history': updated_history,
-                    'audio_file': audio_filename
-                })
-
-            except Exception as e:
-                print(f"Erro no endpoint /api/chatbot: {str(e)}")
-                return jsonify({'error': str(e)}), 500
-
-        @app.route('/api/speech-to-text', methods=['POST'])
-        def speech_to_text():
-            try:
-                if 'audio' not in request.files:
-                    return jsonify({'error': 'Nenhum arquivo de áudio fornecido'}), 400
-                
-                audio_file = request.files['audio']
-                
-                # Salvar o arquivo temporariamente
-                temp_path = os.path.join(chatbot_server.os_system.base_path, 'temp_audio.wav')
-                audio_file.save(temp_path)
-                
-                # Converter áudio para texto
-                text = chatbot_server.os_system.speech_to_text(temp_path)
-                
-                # Limpar arquivo temporário
-                os.remove(temp_path)
-                
-                if text:
-                    return jsonify({'text': text})
-                else:
-                    return jsonify({'error': 'Não foi possível reconhecer o áudio'}), 400
-
-            except Exception as e:
-                print(f"Erro no endpoint /speech-to-text: {str(e)}")
-                return jsonify({'error': str(e)}), 500
-
-        @app.route('/static/mp3/<path:filename>')
-        def serve_audio(filename):
-            return send_from_directory(os.path.join(chatbot_server.os_system.base_path, 'mp3'), filename)
-
-        app.run(debug=True, port=9999, host='0.0.0.0')
+            return render_template("chatbot_template.html")
+        
+        @app.route("/loja")
+        def loja():
+            return render_template("eccomerce_page.html")
 
 
-def run_chatbotc3po_texto():
-    server = ChatbotServer()
-    texto = input("Digite o prompt: ")
-    resposta = server.assistente.responder(texto)
-    print("\nC3PO Responde")
-    print(resposta)
+        #! Rota para servir o arquivo MP3 diretamente
+        @app.route('/models', methods=['GET'])
+        def get_models():
+            # Sua lógica aqui
+            return jsonify(['gemini-pro', 'another-model'])
+        
 
-def main():
-    run_chatbotc3po_texto()
+        @app.route('/chat_output', methods=['POST'])
+        def chat_output():
+            # Sua lógica aqui
+            data = request.json
+            # Processamento e resposta
+            return jsonify({
+                'conversation_history': data['conversation_history'] + [{'role': 'assistant', 'content': 'Resposta do assistente'}],
+                'audio_file': 'output.mp3'
+            })
+        
 
+        @app.route('/static/<path:filename>')
+        def serve_static(filename):
+            return send_from_directory(os.path.join(app.root_path, 'static'), filename)
+
+
+        @app.route("/chat", methods=["POST"])
+        def chat():
+            data = request.json
+            model = data.get("model", DEFAULT_MODEL)
+            user_input = data.get("user_input", "")
+            conversation_history = data.get("conversation_history", [])
+
+            response, updated_history = self.chat_with_model(
+                model, user_input, conversation_history
+            )
+
+            # Generate speech from the response
+            audio_file = (
+                self.text_to_speechGoogle(response)
+                if data.get("voice_enabled", True)
+                else None
+            )
+            return jsonify(
+                {
+                    "response": response,
+                    "conversation_history": updated_history,
+                    "audio_file": audio_file,
+                }
+            )
+
+        #app.run(debug=True)
+        app.run(host='0.0.0.0', port=9090)
 
 if __name__ == "__main__":
     server = ChatbotServer()
     server.run()
-    
-    #run_chatbotc3po_texto()
