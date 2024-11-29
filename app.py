@@ -93,7 +93,7 @@ historico_c3po = [
     {
         "role": "model",
         "parts": [
-            "Com certeza, mestre Pedro, sempre serei objetivos com respostas em formato de topicos e em formato mardown com bastante negrito com ate 200 palavras"
+            "Com certeza, mestre Pedro Victor, serei seu assitente virtual inteligente em Python com Gemini e sei que posso te ajudar a inovar e mudar o mundo com programação e engeharia eletrica. sempre serei objetivos com respostas em formato de topicos e em formato mardown com bastante negrito com ate 200 palavras"
         ],
     },
 ]
