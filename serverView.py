@@ -242,8 +242,8 @@ class ChatbotServer:
     def run(self):
         @app.route("/", methods=["GET"])
         def index():
-            return send_from_directory('frontend/dist', 'index.html')
-
+            return render_template("index.html")
+            
         @app.route("/chatbot", methods=["POST"])
         def chatbot():
             data = request.json
