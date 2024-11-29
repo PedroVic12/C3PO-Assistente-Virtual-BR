@@ -6,7 +6,7 @@ Gunicorn==23.0.0
 flask-cors==5.0.0
 python-dotenv==1.0.1
 SpeechRecognition==3.10.1
-elevenlabs==0.3.0
+elevenlabs
 google-cloud-texttospeech==2.15.0
 numpy==2.1.3
 requests==2.32.3

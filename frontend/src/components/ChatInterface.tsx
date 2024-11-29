@@ -144,7 +144,7 @@ const ChatInterface: React.FC = () => {
     <div className="container">
       <h1>Assistente de Pedro Victor Veras C3PO! Tdah, produtividade, rotinas e treinos!</h1>
       <div className="image-container">
-        <img src="https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif" alt="C3PO Animation" />
+        <img src="https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif"   alt="C3PO Animation" />
       </div>
       <div className="chat-container">
         <div className="messages" ref={messagesEndRef}>
