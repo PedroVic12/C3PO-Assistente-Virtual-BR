@@ -8,12 +8,14 @@ from google.auth import credentials as ga_credentials
 import google.generativeai as genai
 from datetime import datetime
 from flask_cors import CORS
+from src.voice_assistente import OSystem, TextToSpeech
+from c3po_gemini_api import FreelanceManager
 
 #from dotenv import load_dotenv
 
 #load_dotenv()
 
-API_KEY = "AIzaSyAkCx9OWVeOfkTQY3dJo3tB22hYdxzYzPI"
+API_KEY = "AIzaSyAxDCA2uS0OGqDZkaGJ0C-TNPQcllywwhg"
 BASE_URL = "https://api.generativeai.google.com/v1beta2"
 DEFAULT_MODEL = "gemini-pro"
 DEFAULT_VOICE = "pt-BR-Wavenet-A"
@@ -204,6 +206,7 @@ class ChatbotServer:
         self.assistente = AssistenteGenAI()
         self.tts_system = TextToSpeech()
         self.os_system = OSystem()
+        #self.freelance_manager = FreelanceManager()
 
     def list_models(self):
         return [DEFAULT_MODEL]
@@ -219,6 +222,9 @@ class ChatbotServer:
         return assistant_response, conversation_history
 
     def run(self):
+        # Add routes for Google Sheets API
+        setup_routes(app, self.freelance_manager)
+
         @app.route("/", methods=["GET"])
         def index():
             return render_template("index.html")
@@ -270,6 +276,18 @@ class ChatbotServer:
         app.run(debug=True, port=9999, host='0.0.0.0')
 
 
-if __name__ == "__main__":
+def run_chatbotc3po_texto():
     server = ChatbotServer()
-    server.run()
+    texto = input("Digite o prompt: ")
+    resposta = server.assistente.responder(texto)
+    print("\nC3PO Responde")
+    print(resposta)
+
+def main():
+    run_chatbotc3po_texto()
+
+
+if __name__ == "__main__":
+    #server = ChatbotServer()
+    #server.run()
+    run_chatbotc3po_texto()
