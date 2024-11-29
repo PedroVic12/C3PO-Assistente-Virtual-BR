@@ -228,6 +228,10 @@ class ChatbotServer:
         @app.route("/", methods=["GET"])
         def index():
             return render_template("index.html")
+
+        @app.route("/home", methods=["GET"])
+        def home():
+            return render_template("home.html")
             
         @app.route("/chatbot", methods=["POST"])
         def chatbot():
