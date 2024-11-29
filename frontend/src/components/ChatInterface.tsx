@@ -10,7 +10,8 @@ interface Message {
   isBot: boolean;
 }
 
-const API_URL = 'http://localhost:5000/api';
+// API calls will be proxied through Vite
+const API_URL = '/api';
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([
@@ -19,8 +20,6 @@ export function ChatInterface() {
   const [inputText, setInputText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const [model, setModel] = useState('gemini-pro');
-  const [models, setModels] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -30,14 +29,6 @@ export function ChatInterface() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  useEffect(() => {
-    // Fetch available models when component mounts
-    fetch(`${API_URL}/models`)
-      .then(response => response.json())
-      .then(data => setModels(data.models))
-      .catch(error => console.error('Error fetching models:', error));
-  }, []);
 
   const handleSend = async () => {
     if (!inputText.trim()) return;
@@ -56,7 +47,6 @@ export function ChatInterface() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model,
           user_input: inputText,
           conversation_history: messages.map(msg => ({
             role: msg.isBot ? 'assistant' : 'user',

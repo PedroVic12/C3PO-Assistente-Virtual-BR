@@ -242,22 +242,11 @@ class ChatbotServer:
     def run(self):
         @app.route("/",methods=["GET"])
         def index():
-            models = self.list_models()
-            print("\nModelos Disponiveis: ", models)
-            return render_template(
-                "index.html",
-                models=models,
-                default_model=DEFAULT_MODEL,
-            )
+            return send_from_directory('frontend/dist', 'index.html')
 
-        @app.route("/home")
-        def home():
-            return render_template("home.html")
-
-        # Rota para servir o arquivo MP3 diretamente
-        @app.route('/static/<path:filename>')
-        def serve_static(filename):
-            return send_from_directory(os.path.join(app.root_path, 'static'), filename)
+        @app.route("/<path:path>")
+        def serve_static_files(path):
+            return send_from_directory('frontend/dist', path)
 
         @app.route("/api/models", methods=["GET"])
         def get_models():
@@ -289,7 +278,7 @@ class ChatbotServer:
                 }
             )
 
-        app.run(debug=True, port=5000)
+        app.run(debug=True, port=9999, host='0.0.0.0')
 
 
 if __name__ == "__main__":
