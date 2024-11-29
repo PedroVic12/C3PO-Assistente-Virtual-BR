@@ -158,7 +158,7 @@ historico_c3po = history = [
 class AssistenteGenAI:
     def __init__(self):
         generation_config = genai.types.GenerationConfig(
-            temperature=0.5,
+            temperature=0.3,
             top_k=40,
             top_p=0.95,
             candidate_count=1,
@@ -288,6 +288,7 @@ def main():
 
 
 if __name__ == "__main__":
-    #server = ChatbotServer()
-    #server.run()
-    run_chatbotc3po_texto()
+    server = ChatbotServer()
+    server.run()
+    
+    #run_chatbotc3po_texto()
