@@ -64,7 +64,7 @@ repo = repository()
 
 #texto = f" Atualmente estou seguindo este quadro para ser kanban : {quadro}"
 
-texto = f"Atualmente estou seguindo uma rotina de 9h de foco, 8h de sono, 1h de treino(2 ou 3 por dia), Trabalho focado (6h), Estudis em 2h, com meditacoes, alongamentos e treinos intercalado com foco."
+texto = f"Atualmente estou seguindo uma rotina de 9h de foco, 8h de sono, 1h de treino(2 ou 3 por dia), Trabalho focado em programacao, aplciativos, sistemas web e modelos de AI com visao computacional (6h), Estudus em  engenharia eletrica com circuitos eletricos, eletromag, cricuitos digitais, economia e sistemas de potencia 2h, com meditacoes, alongamentos e treinos intercalado com foco."
 
 historico_c3po = history = [
     {
