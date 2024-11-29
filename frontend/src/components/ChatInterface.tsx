@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './ChatInterface.css';
 
 interface Message {
   text: string;
   isBot: boolean;
+  audioFile?: string;
 }
 
 const ChatInterface: React.FC = () => {
@@ -13,6 +15,7 @@ const ChatInterface: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -24,6 +27,18 @@ const ChatInterface: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const playAudio = (audioFile: string) => {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    const audio = new Audio(`/static/mp3/${audioFile}`);
+    setCurrentAudio(audio);
+    audio.play().catch(error => {
+      console.error('Erro ao tocar áudio:', error);
+    });
+  };
 
   const handleSend = async () => {
     if (!inputText.trim()) return;
@@ -50,11 +65,14 @@ const ChatInterface: React.FC = () => {
 
       const data = await response.json();
       
-      setMessages(prev => [...prev, { text: data.response, isBot: true }]);
+      setMessages(prev => [...prev, { 
+        text: data.response, 
+        isBot: true,
+        audioFile: data.audio_file 
+      }]);
 
       if (data.audio_file) {
-        const audio = new Audio(`/api/static/${data.audio_file}`);
-        audio.play();
+        playAudio(data.audio_file);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -132,7 +150,15 @@ const ChatInterface: React.FC = () => {
         <div className="messages" ref={messagesEndRef}>
           {messages.map((msg, index) => (
             <div key={index} className={`message ${msg.isBot ? 'bot' : 'user'}`}>
-              {msg.text}
+              <ReactMarkdown>{msg.text}</ReactMarkdown>
+              {msg.isBot && msg.audioFile && (
+                <button 
+                  className="audio-button"
+                  onClick={() => playAudio(msg.audioFile!)}
+                >
+                  🔊 Ouvir Resposta
+                </button>
+              )}
             </div>
           ))}
           {isThinking && (
