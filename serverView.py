@@ -13,7 +13,7 @@ from flask_cors import CORS
 
 #load_dotenv()
 
-API_KEY = "AIzaSyCZhKI6vWIAK0GkzXajc-PUjTBEO5zjoeA"
+API_KEY = "AIzaSyAkCx9OWVeOfkTQY3dJo3tB22hYdxzYzPI"
 BASE_URL = "https://api.generativeai.google.com/v1beta2"
 DEFAULT_MODEL = "gemini-pro"
 DEFAULT_VOICE = "pt-BR-Wavenet-A"
