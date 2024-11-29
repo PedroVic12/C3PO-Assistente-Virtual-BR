@@ -7,6 +7,7 @@ from google.api_core import gapic_v1
 from google.auth import credentials as ga_credentials
 import google.generativeai as genai
 from datetime import datetime
+from flask_cors import CORS
 
 #from dotenv import load_dotenv
 
@@ -20,6 +21,8 @@ DEFAULT_VOICE = "pt-BR-Wavenet-A"
 app = Flask(__name__, static_url_path="/static", static_folder="static", template_folder='templates')  # Servidor Flask
 app.config['UPLOAD_FOLDER'] = 'uploads'  # Create a folder named 'uploads' in your project directory
 #PATH = r"/home/pedrov/Downloads/kanban_quadro_model.xlsx"
+
+CORS(app, resources={r"/*": {"origins": "*"}})  # Enable CORS for all routes
 
 genai.configure(api_key=API_KEY)
 
@@ -256,8 +259,12 @@ class ChatbotServer:
         def serve_static(filename):
             return send_from_directory(os.path.join(app.root_path, 'static'), filename)
 
+        @app.route("/api/models", methods=["GET"])
+        def get_models():
+            models = self.list_models()
+            return jsonify({"models": models})
 
-        @app.route("/chat", methods=["POST"])
+        @app.route("/api/chat", methods=["POST"])
         def chat():
             data = request.json
             model = data.get("model", DEFAULT_MODEL)
@@ -282,7 +289,7 @@ class ChatbotServer:
                 }
             )
 
-        app.run(debug=True)
+        app.run(debug=True, port=5000)
 
 
 if __name__ == "__main__":
