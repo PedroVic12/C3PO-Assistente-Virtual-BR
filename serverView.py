@@ -232,49 +232,66 @@ class ChatbotServer:
                 return send_from_directory(app.static_folder, path)
             return render_template("index.html")
 
-        @app.route("/api/chatbot", methods=["POST"])
+        @app.route('/api/chatbot', methods=['POST'])
         def chatbot():
-            data = request.json
-            user_input = data.get("user_input", "")
-            conversation_history = data.get("conversation_history", [])
+            try:
+                data = request.json
+                user_input = data.get('user_input', '')
+                conversation_history = data.get('conversation_history', [])
+                voice_enabled = data.get('voice_enabled', True)
 
-            response, updated_history = self.chat_with_model(
-                DEFAULT_MODEL, user_input, conversation_history
-            )
+                # Gerar resposta do modelo
+                response, updated_history = chatbot_server.chat_with_model(
+                    DEFAULT_MODEL, user_input, conversation_history
+                )
 
-            # Generate speech using ElevenLabs
-            if data.get("voice_enabled", True):
-                audio_file = self.tts_system.text_to_speech(response)
-                if audio_file:
-                    # Get just the filename from the full path
-                    audio_filename = os.path.basename(audio_file)
-                else:
-                    audio_filename = None
-            else:
+                # Gerar áudio se voice_enabled for True
                 audio_filename = None
+                if voice_enabled:
+                    audio_path = chatbot_server.tts_system.text_to_speech(response)
+                    if audio_path:
+                        audio_filename = os.path.basename(audio_path)
 
-            return jsonify({
-                "response": response,
-                "conversation_history": updated_history,
-                "audio_file": audio_filename
-            })
+                return jsonify({
+                    'response': response,
+                    'conversation_history': updated_history,
+                    'audio_file': audio_filename
+                })
+
+            except Exception as e:
+                print(f"Erro no endpoint /api/chatbot: {str(e)}")
+                return jsonify({'error': str(e)}), 500
 
         @app.route('/api/speech-to-text', methods=['POST'])
         def speech_to_text():
-            if 'audio' not in request.files:
-                return jsonify({'error': 'No audio file provided'}), 400
-            
-            audio_file = request.files['audio']
-            
             try:
-                text = self.os_system.speech_to_text(audio_file)
-                return jsonify({'text': text})
+                if 'audio' not in request.files:
+                    return jsonify({'error': 'Nenhum arquivo de áudio fornecido'}), 400
+                
+                audio_file = request.files['audio']
+                
+                # Salvar o arquivo temporariamente
+                temp_path = os.path.join(chatbot_server.os_system.base_path, 'temp_audio.wav')
+                audio_file.save(temp_path)
+                
+                # Converter áudio para texto
+                text = chatbot_server.os_system.speech_to_text(temp_path)
+                
+                # Limpar arquivo temporário
+                os.remove(temp_path)
+                
+                if text:
+                    return jsonify({'text': text})
+                else:
+                    return jsonify({'error': 'Não foi possível reconhecer o áudio'}), 400
+
             except Exception as e:
+                print(f"Erro no endpoint /speech-to-text: {str(e)}")
                 return jsonify({'error': str(e)}), 500
 
-        @app.route('/api/static/<path:filename>')
-        def serve_static(filename):
-            return send_from_directory('static', filename)
+        @app.route('/static/mp3/<path:filename>')
+        def serve_audio(filename):
+            return send_from_directory(os.path.join(chatbot_server.os_system.base_path, 'mp3'), filename)
 
         app.run(debug=True, port=9999, host='0.0.0.0')
 
