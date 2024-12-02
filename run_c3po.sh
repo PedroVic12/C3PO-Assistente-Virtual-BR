@@ -35,5 +35,5 @@ pm2 start "npm run dev" --name "c3po-frontend"
 pm2 list
 
 echo "C-3PO is now running!"
-echo "Backend: http://localhost:9999"
+echo "Backend: http://localhost:7777"
 echo "Frontend: http://localhost:8888"

@@ -237,4 +237,4 @@ def serve_audio(filename):
     return send_from_directory(os.path.join(chatbot_server.os_system.base_path, 'mp3'), filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=9999, host='0.0.0.0')
+    app.run(debug=True, port=7777, host='0.0.0.0')
