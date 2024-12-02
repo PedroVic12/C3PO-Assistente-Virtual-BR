@@ -82,6 +82,51 @@ cd frontend && npm run dev
   - Engenharia Elétrica
   - Artigos Científicos
 
+## 🔔 Alarm Clock Feature
+
+The C3PO now includes a modern alarm clock feature with a graphical interface built using Flet. Here's what was implemented:
+
+### Features
+- Modern dark-themed UI
+- Sound file selection for alarm
+- Time selection using dropdowns (hours, minutes, seconds)
+- Start/Stop alarm functionality
+- Background alarm monitoring
+- Visual feedback and status updates
+
+### How to Use
+1. Launch the alarm clock:
+   ```bash
+   python src/alarm_clock.py
+   ```
+
+2. Select your alarm sound:
+   - Click "Pick sound file"
+   - Choose an MP3 or WAV file
+   - The selected file name will be displayed
+
+3. Set the alarm time:
+   - Use the dropdowns to select hours, minutes, and seconds
+   - The time is in 24-hour format
+
+4. Control the alarm:
+   - Click "Start Alarm" to set it
+   - Click "Stop Alarm" to cancel it
+   - Current status is shown below the buttons
+
+### Technical Details
+- Built with Flet for modern UI
+- Uses pygame for sound playback
+- Runs alarm in background thread
+- Supports MP3 and WAV audio formats
+- Real-time status updates
+- Thread-safe implementation
+
+### Dependencies
+- Flet
+- Pygame
+- Python standard libraries (datetime, threading)
+
 ## 👨‍💻 Desenvolvedor
 
 - Pedro Victor Veras
