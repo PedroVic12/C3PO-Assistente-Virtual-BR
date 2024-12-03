@@ -36,4 +36,4 @@ pm2 list
 
 echo "C-3PO is now running!"
 echo "Backend: http://localhost:7777"
-echo "Frontend: http://localhost:8888"
+echo "Frontend: http://localhost:9999"
