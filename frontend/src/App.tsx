@@ -5,8 +5,8 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>C-3PO Assistant</h1>
-        <p>Your Personal Protocol Droid</p>
+        <h1>C-3PO Assistant from Star Wars</h1>
+        <p>Your Personal Protocol Droid from Pedro Victor Veras</p>
       </header>
       <main className="app-main">
         <ChatInterface />

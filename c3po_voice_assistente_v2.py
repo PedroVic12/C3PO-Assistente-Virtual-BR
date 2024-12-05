@@ -1,6 +1,13 @@
 import os
 import tempfile
-from flask import Flask, request, jsonify, render_template, send_from_directory, send_file
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    render_template,
+    send_from_directory,
+    send_file,
+)
 import requests
 from google.api_core import client_options as client_options_lib
 from google.api_core import gapic_v1
@@ -17,6 +24,7 @@ DEFAULT_VOICE = "pt-BR-Wavenet-A"
 
 genai.configure(api_key=API_KEY)
 
+texto = "PERDI um relacionamento, preciso me organizar nos estudos e projetos, atrasei 2 frellancers e publiquei um projeto em python com alg genetico, preciso gravar videos no ytouiube e estudar ciruitos eletricos e etenho que publicar 7 projetos em 14 dias sera que cosnigo?"
 
 historico_c3po = [
     {
@@ -77,8 +85,7 @@ historico_c3po = [
             "Mestre Pedro, tudo bem! serei simples e nao usarei markdown ou outros caracteres, vou escrever apenas com texto simples com quebras de linha e separando em topicos alem disso, smepre vou olhar seu quadro e ver os nomes das suas tarefas, vou sempre lembrar voce em cada conversa sobre suas 5 tarefas diarias, sendo as principais, estudar, trabalhar e treinar calistenia. Sempre vou te ajudar a se manter organizado usando tecnicas de Scrum e Kanban"
         ],
     },
-
-        {
+    {
         "role": "user",
         "parts": [
             "Voce é um cara intelingente que sempre usa citacoes de steve jobs, Albert Enstein e Nikola tesla, voce sabe que inovar faz parte da sua jornada!"
@@ -91,6 +98,7 @@ historico_c3po = [
         ],
     },
 ]
+
 
 class AssistenteGenAI:
     def __init__(self):
@@ -129,17 +137,13 @@ class AssistenteGenAI:
             chat = self.model.start_chat(history=historico_c3po)
             chat.send_message(user_input)
             texto = chat.last.text
-            return {
-                'thinking': False,
-                'response': texto,
-                'success': True
-            }
+            return {"thinking": False, "response": texto, "success": True}
         except Exception as e:
             print("Erro ao responder", e)
             return {
-                'thinking': False,
-                'response': "Desculpe, ocorreu um erro ao processar sua solicitação.",
-                'success': False
+                "thinking": False,
+                "response": "Desculpe, ocorreu um erro ao processar sua solicitação.",
+                "success": False,
             }
 
     def pensar(self, user_input):
@@ -147,77 +151,61 @@ class AssistenteGenAI:
             chat = self.model.start_chat(history=historico_c3po)
             chat.send_message(user_input)
             texto = chat.last.text
-            return {
-                'thinking': True,
-                'response': texto,
-                'success': True
-            }
+            return {"thinking": True, "response": texto, "success": True}
         except Exception as e:
             print("Erro ao pensar", e)
             return {
-                'thinking': False,
-                'response': "Desculpe, ocorreu um erro ao processar sua solicitação.",
-                'success': False
+                "thinking": False,
+                "response": "Desculpe, ocorreu um erro ao processar sua solicitação.",
+                "success": False,
             }
-    
+
     def ver_imagem(self, user_input):
         try:
             chat = self.model.start_chat(history=historico_c3po)
             chat.send_message(user_input)
             texto = chat.last.text
-            return {
-                'thinking': False,
-                'response': texto,
-                'success': True
-            }
+            return {"thinking": False, "response": texto, "success": True}
         except Exception as e:
             print("Erro ao responder", e)
             return {
-                'thinking': False,
-                'response': "Desculpe, ocorreu um erro ao processar sua solicitação.",
-                'success': False
+                "thinking": False,
+                "response": "Desculpe, ocorreu um erro ao processar sua solicitação.",
+                "success": False,
             }
-    
+
     def ver_video(self, user_input):
         try:
             chat = self.model.start_chat(history=historico_c3po)
             chat.send_message(user_input)
             texto = chat.last.text
-            return {
-                'thinking': False,
-                'response': texto,
-                'success': True
-            }
+            return {"thinking": False, "response": texto, "success": True}
         except Exception as e:
             print("Erro ao responder", e)
             return {
-                'thinking': False,
-                'response': "Desculpe, ocorreu um erro ao processar sua solicitação.",
-                'success': False
+                "thinking": False,
+                "response": "Desculpe, ocorreu um erro ao processar sua solicitação.",
+                "success": False,
             }
-    
+
     def ver_audio(self, user_input):
         try:
             chat = self.model.start_chat(history=historico_c3po)
             chat.send_message(user_input)
             texto = chat.last.text
-            return {
-                'thinking': False,
-                'response': texto,
-                'success': True
-            }
+            return {"thinking": False, "response": texto, "success": True}
         except Exception as e:
             print("Erro ao responder", e)
             return {
-                'thinking': False,
-                'response': "Desculpe, ocorreu um erro ao processar sua solicitação.",
-                'success': False
+                "thinking": False,
+                "response": "Desculpe, ocorreu um erro ao processar sua solicitação.",
+                "success": False,
             }
 
     def arquivo_handler(self, user_input):
         try:
             if user_input == ".xlsx":
-                
+
                 print("Lendo arquivo Excel...")
 
             if user_input == ".csv":
@@ -239,23 +227,22 @@ class AssistenteGenAI:
                 print("Lendo arquivo JPEG...")
 
             return {
-                'thinking': False,
-                'response': "Arquivo lido com sucesso",
-                'success': True
+                "thinking": False,
+                "response": "Arquivo lido com sucesso",
+                "success": True,
             }
         except Exception as e:
             print("Erro ao responder", e)
             return {
-                'thinking': False,
-                'response': "Desculpe, ocorreu um erro ao processar sua solicitação.",
-                'success': False
+                "thinking": False,
+                "response": "Desculpe, ocorreu um erro ao processar sua solicitação.",
+                "success": False,
             }
-
 
 
 if __name__ == "__main__":
 
     texto = f"Atualmente estou seguindo uma rotina de 9h de foco, 8h de sono, 1h de treino(2 ou 3 por dia), Trabalho focado em programacao, aplciativos, sistemas web e modelos de AI com visao computacional (6h), Estudus em  engenharia eletrica com circuitos eletricos, eletromag, cricuitos digitais, economia e sistemas de potencia 2h, com meditacoes, alongamentos e treinos intercalado com foco."
-    assistente = AssistenteGenAI() 
-    response =assistente.responder(texto)
+    assistente = AssistenteGenAI()
+    response = assistente.responder(texto)
     print("Resposta:", response["response"])

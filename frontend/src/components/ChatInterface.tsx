@@ -15,10 +15,12 @@ const ChatInterface: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const wsRef = useRef<WebSocket | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,6 +29,34 @@ const ChatInterface: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    // Connect to WebSocket server
+    wsRef.current = new WebSocket('ws://localhost:8000/ws/chat');
+
+    wsRef.current.onopen = () => {
+      setIsConnected(true);
+      console.log('Connected to WebSocket');
+    };
+
+    wsRef.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      setMessages(prev => [...prev, { 
+        text: message.content, 
+        isBot: true 
+      }]);
+      setIsThinking(false);
+    };
+
+    wsRef.current.onclose = () => {
+      setIsConnected(false);
+      console.log('Disconnected from WebSocket');
+    };
+
+    return () => {
+      wsRef.current?.close();
+    };
+  }, []);
 
   const playAudio = (audioFile: string) => {
     if (currentAudio) {
@@ -41,48 +71,18 @@ const ChatInterface: React.FC = () => {
   };
 
   const handleSend = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || !wsRef.current || !isConnected) return;
 
     setMessages(prev => [...prev, { text: inputText, isBot: false }]);
-    setInputText('');
     setIsThinking(true);
 
-    try {
-      const response = await fetch('http://localhost:9999/api/chatbot', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_input: inputText,
-          conversation_history: messages.map(msg => ({
-            role: msg.isBot ? 'assistant' : 'user',
-            content: msg.text
-          })),
-          voice_enabled: true
-        }),
-      });
+    const message = {
+      type: 'message',
+      content: inputText
+    };
 
-      const data = await response.json();
-      
-      setMessages(prev => [...prev, { 
-        text: data.response, 
-        isBot: true,
-        audioFile: data.audio_file 
-      }]);
-
-      if (data.audio_file) {
-        playAudio(data.audio_file);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setMessages(prev => [...prev, { 
-        text: "Desculpe, ocorreu um erro ao processar sua mensagem.", 
-        isBot: true 
-      }]);
-    } finally {
-      setIsThinking(false);
-    }
+    wsRef.current.send(JSON.stringify(message));
+    setInputText('');
   };
 
   const startListening = async () => {
@@ -144,7 +144,7 @@ const ChatInterface: React.FC = () => {
     <div className="container">
       <h1>Assistente de Pedro Victor Veras C3PO! Tdah, produtividade, rotinas e treinos!</h1>
       <div className="image-container">
-        <img src="https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif"   alt="C3PO Animation" />
+        <img src="https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif" alt="C3PO Animation" />
       </div>
       <div className="chat-container">
         <div className="messages" ref={messagesEndRef}>
@@ -174,15 +174,15 @@ const ChatInterface: React.FC = () => {
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Digite sua mensagem..."
-            disabled={isThinking}
+            disabled={isThinking || !isConnected}
           />
-          <button onClick={handleSend} disabled={isThinking || !inputText.trim()}>
+          <button onClick={handleSend} disabled={isThinking || !inputText.trim() || !isConnected}>
             Enviar
           </button>
           <button 
             onClick={toggleVoice}
             className={`voice-button ${isListening ? 'recording' : ''}`}
-            disabled={isThinking}
+            disabled={isThinking || !isConnected}
           >
             🎤
           </button>
