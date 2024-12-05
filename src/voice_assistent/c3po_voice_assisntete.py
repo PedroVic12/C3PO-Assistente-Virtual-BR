@@ -162,16 +162,27 @@ class VoiceAssistant:
 
     def run(self):
         self.falar_voice_google("\nOlá! Eu sou o C3PO, seu assistente pessoal. Como posso ajudar?")
+        
+        ligar_mic = True
+        
         while True:
+
+
             self.menu_comando_porVoz()
-            text = self.listen()
-            
-            if not text:
-                continue
-                
-            if text == "desligar":
-                self.speak("Até logo!")
-                break
+            if ligar_mic:
+                self.falar_voice_google("O que deseja?")
+                text = self.listen()
+
+                if not text:
+                    continue
+                    
+                if text == "desligar":
+                    self.speak("Até logo!")
+                    break
+        
+            else:
+                texto = input("Escreva sua mensagem (ou #sair): ")
+
 
             # Primeiro tenta processar como comando
             if not self.process_command(text):
