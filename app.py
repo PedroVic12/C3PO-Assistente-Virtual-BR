@@ -11,6 +11,8 @@ from flask_cors import CORS
 #from src.voice_assistente import OSystem, TextToSpeech
 from gtts import gTTS
 from pygame import mixer
+from pydub import AudioSegment
+
 
 
 API_KEY = "AIzaSyAxDCA2uS0OGqDZkaGJ0C-TNPQcllywwhg"
@@ -136,10 +138,18 @@ class AssistenteGenAI:
     def falar_voice_google(self, text):
         # Salvar o arquivo de áudio na pasta static
         audio_file_path = './static/audio.mp3'  # Caminho atualizado para a pasta static
+
+        # Criar o arquivo de áudio
         tts = gTTS(text=text, lang='pt-br', slow=False, tld='com.br')
         tts.save(audio_file_path)
 
-        mixer.init()
+        # Acelerar o áudio
+        audio = AudioSegment.from_file(audio_file_path)
+        audio = audio.speedup(playback_speed=1.5)  # Aumentar a velocidade em 50%
+        audio.export(audio_file_path, format='mp3')
+
+        # Inicializar o mixer
+        mixer.init(frequency=22050)  # Usar uma frequência padrão
         mixer.music.load(audio_file_path)
         mixer.music.play()
         while mixer.music.get_busy():
