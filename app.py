@@ -140,7 +140,7 @@ class AssistenteGenAI:
         audio_file_path = './static/audio.mp3'  # Caminho atualizado para a pasta static
 
         # Criar o arquivo de áudio
-        tts = gTTS(text=text, lang='pt-br', slow=False, tld='com.br')
+        tts = gTTS(text=text, lang='pt', slow=False, tld='com.br')
         tts.save(audio_file_path)
 
         # Acelerar o áudio
@@ -152,6 +152,7 @@ class AssistenteGenAI:
         mixer.init(frequency=22050)  # Usar uma frequência padrão
         mixer.music.load(audio_file_path)
         mixer.music.play()
+        mixer.music.set_volume(0.8)
         while mixer.music.get_busy():
             pass
         mixer.music.stop()
