@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState,  useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './ChatInterface.css';
 
@@ -13,152 +13,64 @@ const ChatInterface: React.FC = () => {
     { text: "Olá! Eu sou o C3PO, como posso ajudar?", isBot: true }
   ]);
   const [inputText, setInputText] = useState('');
-  const [isListening, setIsListening] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const [isThinking, setIsThinking] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const wsRef = useRef<WebSocket | null>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Scroll para a última mensagem
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    // Connect to WebSocket server
-    wsRef.current = new WebSocket('ws://localhost:8000/ws/chat');
-
-    wsRef.current.onopen = () => {
-      setIsConnected(true);
-      console.log('Connected to WebSocket');
-    };
-
-    wsRef.current.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      setMessages(prev => [...prev, { 
-        text: message.content, 
-        isBot: true 
-      }]);
-      setIsThinking(false);
-    };
-
-    wsRef.current.onclose = () => {
-      setIsConnected(false);
-      console.log('Disconnected from WebSocket');
-    };
-
-    return () => {
-      wsRef.current?.close();
-    };
-  }, []);
-
-  const playAudio = (audioFile: string) => {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-    }
-    const audio = new Audio(`/static/mp3/${audioFile}`);
-    setCurrentAudio(audio);
-    audio.play().catch(error => {
-      console.error('Erro ao tocar áudio:', error);
-    });
-  };
-
   const handleSend = async () => {
-    if (!inputText.trim() || !wsRef.current || !isConnected) return;
+    if (!inputText.trim()) return;
 
     setMessages(prev => [...prev, { text: inputText, isBot: false }]);
     setIsThinking(true);
 
-    const message = {
-      type: 'message',
-      content: inputText
-    };
+    const response = await fetch('http://localhost:7777/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message: inputText })
+    });
 
-    wsRef.current.send(JSON.stringify(message));
+    const data = await response.json();
+    setMessages(prev => [...prev, { text: data.response, isBot: true }]);
+    setIsThinking(false);
     setInputText('');
   };
 
-  const startListening = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
-      audioChunksRef.current = [];
+  const handleFileUpload = async () => {
+    if (!file) return;
 
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
+    const formData = new FormData();
+    formData.append('file', file);
 
-      mediaRecorderRef.current.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        const formData = new FormData();
-        formData.append('audio', audioBlob);
+    const response = await fetch('http://localhost:7777/process_file', {
+      method: 'POST',
+      body: formData
+    });
 
-        try {
-          const response = await fetch('/api/speech-to-text', {
-            method: 'POST',
-            body: formData
-          });
-
-          const data = await response.json();
-          if (data.text) {
-            setInputText(data.text);
-            handleSend();
-          }
-        } catch (error) {
-          console.error('Error converting speech to text:', error);
-        }
-
-        audioChunksRef.current = [];
-      };
-
-      mediaRecorderRef.current.start();
-      setIsListening(true);
-    } catch (error) {
-      console.error('Error accessing microphone:', error);
-    }
-  };
-
-  const stopListening = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-      setIsListening(false);
-    }
-  };
-
-  const toggleVoice = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
+    const data = await response.json();
+    setMessages(prev => [...prev, { text: data.response, isBot: true }]);
+    setFile(null);
   };
 
   return (
     <div className="container">
-      <h1>Assistente de Pedro Victor Veras C3PO! Tdah, produtividade, rotinas e treinos!</h1>
-      <div className="image-container">
-        <img src="https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif" alt="C3PO Animation" />
-      </div>
+      <h1>Assistente de Pedro Victor Veras C3PO!</h1>
+      <img src="https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif" alt="Description of the GIF" />
+
       <div className="chat-container">
-        <div className="messages" ref={messagesEndRef}>
+
+        <div className="messages">
           {messages.map((msg, index) => (
             <div key={index} className={`message ${msg.isBot ? 'bot' : 'user'}`}>
               <ReactMarkdown>{msg.text}</ReactMarkdown>
-              {msg.isBot && msg.audioFile && (
-                <button 
-                  className="audio-button"
-                  onClick={() => playAudio(msg.audioFile!)}
-                >
-                  🔊 Ouvir Resposta
-                </button>
-              )}
             </div>
           ))}
           {isThinking && (
@@ -174,17 +86,19 @@ const ChatInterface: React.FC = () => {
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Digite sua mensagem..."
-            disabled={isThinking || !isConnected}
+            disabled={isThinking}
           />
-          <button onClick={handleSend} disabled={isThinking || !inputText.trim() || !isConnected}>
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            accept=".pdf,.jpeg,.jpg"
+            disabled={isThinking}
+          />
+          <button onClick={handleSend} disabled={isThinking || !inputText.trim()}>
             Enviar
           </button>
-          <button 
-            onClick={toggleVoice}
-            className={`voice-button ${isListening ? 'recording' : ''}`}
-            disabled={isThinking || !isConnected}
-          >
-            🎤
+          <button onClick={handleFileUpload} disabled={!file || isThinking}>
+            Enviar Arquivo
           </button>
         </div>
       </div>

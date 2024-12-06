@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  c3po:
+    build: .
+    ports:
+      - "7777:7777"  # Porta para o Flask
+      - "8888:8888"  # Porta para o React
+    volumes:
+      - .:/app  # Montar o diretório atual no container

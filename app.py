@@ -147,6 +147,86 @@ class AssistenteGenAI:
                 'response': "Desculpe, ocorreu um erro ao processar sua solicitação.",
                 'success': False
             }
+    def process_image(self, image_path: str, prompt: str) -> dict[str, any]:
+        """Process an image with an optional text prompt.
+        
+        Args:
+            image_path: Path to the image file
+            prompt: Text prompt to guide image analysis
+            
+        Returns:t
+            Dict containing response status and analysis
+        """
+        try:
+            # Implementation for image processing
+            return {
+                "thinking": False,
+                "response": "Image processing not implemented yet",
+                "success": True
+            }
+        except Exception as e:
+            print(f"Error processing image: {e}")
+            return {
+                "thinking": False,
+                "response": "Error processing the image",
+                "success": False
+            }
+
+    def process_file(self, file_path: str, file_type: str) -> dict[str, any]:
+        """Process various file types (PDF, TXT, CSV, etc.).
+        
+        Args:
+            file_path: Path to the file
+            file_type: Type of file to process
+            
+        Returns:
+            Dict containing response status and processed content
+        """
+
+        if file_type not in ["pdf", "txt", "csv"]:
+            return {
+                "thinking": False,
+                "response": f"Processing {file_type} files not implemented yet",
+                "success": True
+            }
+        
+        elif file_type == "pdf":
+            # Implementation for PDF processing
+            return {
+                "thinking": False,
+                "response": f"Processing {file_type} files not implemented yet",
+                "success": True
+            }
+        
+        elif file_type == "txt":
+            # Implementation for TXT processing
+            return {
+                "thinking": False,
+                "response": f"Processing {file_type} files not implemented yet",
+                "success": True
+            }
+        
+        elif file_type == "csv":
+            # Implementation for CSV processing
+            return {
+                "thinking": False,  
+                "response": f"Processing {file_type} files not implemented yet",
+                "success": True
+            }
+        try:
+            # Implementation for file processing
+            return {
+                "thinking": False,
+                "response": f"Processing {file_type} files not implemented yet",
+                "success": True
+            }
+        except Exception as e:
+            print(f"Error processing file: {e}")
+            return {
+                "thinking": False,
+                "response": f"Error processing {file_type} file",
+                "success": False
+            }
 
 class ChatbotServer:
     def __init__(self):
@@ -174,13 +254,69 @@ class ChatbotServer:
 
 # Instância global do ChatbotServer
 chatbot_server = ChatbotServer()
+assistant = chatbot_server.assistente
 
 @app.route("/", defaults={'path': ''})
+
+
 @app.route("/<path:path>")
 def serve_react(path):
     if path and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
     return render_template("index.html")
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    """Handle chat requests."""
+    data = request.json
+    user_input = data.get('message', '')
+    
+    if not user_input:
+        return jsonify({
+            "success": False,
+            "response": "No message provided"
+        }), 400
+    
+    response = assistant.responder(user_input)
+    return jsonify(response)
+
+@app.route('/process_image', methods=['POST'])
+def process_image():
+    """Handle image processing requests."""
+    if 'image' not in request.files:
+        return jsonify({
+            "success": False,
+            "response": "No image provided"
+        }), 400
+        
+    image = request.files['image']
+    prompt = request.form.get('prompt', '')
+    
+    # Save image to temporary location and process
+    image_path = f"temp/{image.filename}"
+    image.save(image_path)
+    
+    response = assistant.process_image(image_path, prompt)
+    return jsonify(response)
+
+@app.route('/process_file', methods=['POST'])
+def process_file():
+    """Handle file processing requests."""
+    if 'file' not in request.files:
+        return jsonify({
+            "success": False,
+            "response": "No file provided"
+        }), 400
+        
+    file = request.files['file']
+    file_type = file.filename.split('.')[-1]
+    
+    # Save file to temporary location and process
+    file_path = f"temp/{file.filename}"
+    file.save(file_path)
+    
+    response = assistant.process_file(file_path, file_type)
+    return jsonify(response)
 
 @app.route('/api/chatbot', methods=['POST'])
 def chatbot():
