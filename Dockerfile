@@ -1,24 +1,34 @@
-# Usar uma imagem base com Python e Node.js
-FROM node:16-buster as build
+# Use uma imagem base do Python
+FROM python:3.12-slim as backend
 
-# Definir o diretório de trabalho
+# Defina o diretório de trabalho para o backend
 WORKDIR /app
 
-# Copiar os arquivos do backend e frontend
+# Copie os arquivos de requisitos e instale as dependências do backend
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copie o restante dos arquivos do projeto
 COPY . .
 
-# Instalar dependências do Python
-RUN apt-get update && apt-get install -y python3 python3-pip
-RUN pip3 install -r requirements.txt
-
-# Instalar dependências do Node.js
-WORKDIR /app/frontend
-RUN npm install
-RUN npm run build
-
-# Expor as portas
+# Exponha a porta que seu aplicativo Flask está usando
 EXPOSE 7777
-EXPOSE 8888
 
-# Comando para iniciar o Flask e o React
-CMD ["bash", "-c", "pm2 start app.py --name c3po-backend && pm2 start npm --name c3po-frontend -- run dev"]
+# Use uma imagem base do Node.js para o frontend
+FROM node:18 as frontend
+
+# Defina o diretório de trabalho para o frontend
+WORKDIR /app/frontend
+
+# Copie os arquivos do frontend e instale as dependências
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm install
+
+# Copie o restante dos arquivos do frontend
+COPY frontend/ .
+
+# Exponha a porta que seu aplicativo React está usando
+EXPOSE 8080
+
+# Comando para rodar o aplicativo Flask
+CMD ["python", "app.py"]

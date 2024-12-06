@@ -1,10 +1,25 @@
 version: '3.8'
 
 services:
-  c3po:
-    build: .
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend  # Alvo para construir o backend
     ports:
-      - "7777:7777"  # Porta para o Flask
-      - "8888:8888"  # Porta para o React
+      - "7777:7777"  # Mapeia a porta 7777 do contêiner para a porta 7777 da máquina host
     volumes:
-      - .:/app  # Montar o diretório atual no container
+      - .:/app  # Monta o diretório atual no contêiner
+    environment:
+      - API_KEY=AIzaSyAxDCA2uS0OGqDZkaGJ0C-TNPQcllywwhg  # Adicione outras variáveis de ambiente conforme necessário
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend  # Alvo para construir o frontend
+    ports:
+      - "8080:8080"  # Mapeia a porta 8080 do contêiner para a porta 8080 da máquina host
+    volumes:
+      - ./frontend:/app/frontend  # Monta o diretório do frontend no contêiner
+    command: npm run dev  # Comando para rodar o aplicativo frontend
