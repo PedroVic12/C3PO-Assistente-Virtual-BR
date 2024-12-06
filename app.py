@@ -8,7 +8,7 @@ from google.auth import credentials as ga_credentials
 import google.generativeai as genai
 from datetime import datetime
 from flask_cors import CORS
-from src.voice_assistente import OSystem, TextToSpeech
+#from src.voice_assistente import OSystem, TextToSpeech
 from gtts import gTTS
 from pygame import mixer
 
@@ -248,8 +248,8 @@ class AssistenteGenAI:
 class ChatbotServer:
     def __init__(self):
         self.assistente = AssistenteGenAI()
-        self.tts_system = TextToSpeech()
-        self.os_system = OSystem()
+        #self.tts_system = TextToSpeech()
+        #self.os_system = OSystem()
         self.ensure_directories()
 
     def ensure_directories(self):
