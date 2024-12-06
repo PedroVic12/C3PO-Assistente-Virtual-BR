@@ -19,7 +19,7 @@ h1 {
 }
 
 .image-container {
-  width: 800px;
+  width: 900px;
   margin-bottom: 2rem;
   border-radius: 10px;
   overflow: hidden;
@@ -36,8 +36,7 @@ h1 {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 800px;
-  height: 500px;
+  height: 600px;
   background-color: #2d2d2d;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
@@ -113,6 +112,7 @@ input {
   flex: 1;
   padding: 0.75rem;
   border-radius: 0.5rem;
+  height: 7.0rem;
   border: none;
   background-color: #3d3d3d;
   color: #ffffff;

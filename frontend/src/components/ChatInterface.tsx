@@ -1,6 +1,9 @@
 import React, { useState,  useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import './ChatInterface.css';
+import { Fab } from '@mui/material'; // Importando o botão flutuante do Material UI
+import VoiceChatIcon from '@mui/icons-material/VoiceChat';
+
 
 interface Message {
   text: string;
@@ -42,6 +45,9 @@ const ChatInterface: React.FC = () => {
     setMessages(prev => [...prev, { text: data.response, isBot: true }]);
     setIsThinking(false);
     setInputText('');
+
+    // Tocar áudio da resposta
+    await playResponseAudio(data.response);
   };
 
   const handleFileUpload = async () => {
@@ -58,7 +64,26 @@ const ChatInterface: React.FC = () => {
     const data = await response.json();
     setMessages(prev => [...prev, { text: data.response, isBot: true }]);
     setFile(null);
+
+    // Tocar áudio da resposta
+    await playResponseAudio(data.response);
   };
+
+  const playResponseAudio = async (text: string) => {
+    await fetch('http://localhost:7777/falar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text })
+    });
+
+    // Após o áudio ser gerado, você pode tocar o áudio:
+    const audio = new Audio('/static/audio.mp3');
+    audio.play().catch(error => {
+        console.error('Erro ao tocar áudio:', error);
+    });
+};
 
   return (
     <div className="container">
@@ -83,25 +108,32 @@ const ChatInterface: React.FC = () => {
           <input
             type="text"
             value={inputText}
+
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Digite sua mensagem..."
             disabled={isThinking}
           />
-          <input
+ 
+          <button onClick={handleSend} disabled={isThinking || !inputText.trim()}>
+            Enviar
+          </button>
+                {/* Botão flutuante para enviar arquivo e ouvir voz */}
+        <Fab color="primary" aria-label="voice" onClick={handleFileUpload}>
+          <VoiceChatIcon />
+        </Fab>
+
+  
+        </div>
+        
+      </div>
+      <input
             type="file"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
             accept=".pdf,.jpeg,.jpg"
             disabled={isThinking}
           />
-          <button onClick={handleSend} disabled={isThinking || !inputText.trim()}>
-            Enviar
-          </button>
-          <button onClick={handleFileUpload} disabled={!file || isThinking}>
-            Enviar Arquivo
-          </button>
-        </div>
-      </div>
+   
     </div>
   );
 };

@@ -9,6 +9,9 @@ import google.generativeai as genai
 from datetime import datetime
 from flask_cors import CORS
 from src.voice_assistente import OSystem, TextToSpeech
+from gtts import gTTS
+from pygame import mixer
+
 
 API_KEY = "AIzaSyAxDCA2uS0OGqDZkaGJ0C-TNPQcllywwhg"
 BASE_URL = "https://api.generativeai.google.com/v1beta2"
@@ -129,6 +132,20 @@ class AssistenteGenAI:
             generation_config=generation_config,
             safety_settings=safety_settings,
         )
+
+    def falar_voice_google(self, text):
+        # Salvar o arquivo de áudio na pasta static
+        audio_file_path = './static/audio.mp3'  # Caminho atualizado para a pasta static
+        tts = gTTS(text=text, lang='pt-br', slow=False, tld='com.br')
+        tts.save(audio_file_path)
+
+        mixer.init()
+        mixer.music.load(audio_file_path)
+        mixer.music.play()
+        while mixer.music.get_busy():
+            pass
+        mixer.music.stop()
+        mixer.quit()
 
     def responder(self, user_input):
         try:
@@ -252,12 +269,23 @@ class ChatbotServer:
             print(f"Erro ao processar chat: {str(e)}")
             return "Desculpe, ocorreu um erro ao processar sua mensagem.", conversation_history
 
-# Instância global do ChatbotServer
+#! Instância global do ChatbotServer
 chatbot_server = ChatbotServer()
 assistant = chatbot_server.assistente
 
 @app.route("/", defaults={'path': ''})
 
+@app.route('/falar', methods=['POST'])
+def falar():
+    """Handle voice response requests."""
+    data = request.json
+    text = data.get('text', '')
+
+    if not text:
+        return jsonify({"success": False, "response": "No text provided"}), 400
+
+    assistant.falar_voice_google(text)  # Chama a função para gerar o áudio
+    return jsonify({"success": True, "response": "Audio played successfully"})
 
 @app.route("/<path:path>")
 def serve_react(path):
