@@ -11,11 +11,13 @@ from flask_cors import CORS
 #from src.voice_assistente import OSystem, TextToSpeech
 from gtts import gTTS
 from pygame import mixer
-from pydub import AudioSegment
+
+
+#from pydub import AudioSegment
 
 
 
-API_KEY = "AIzaSyAxDCA2uS0OGqDZkaGJ0C-TNPQcllywwhg"
+API_KEY = "AIzaSyCd9Z1RoUCm3cPeibrkCf2vvE8uGa3uJsQ"
 BASE_URL = "https://api.generativeai.google.com/v1beta2"
 DEFAULT_MODEL = "gemini-pro"
 DEFAULT_VOICE = "pt-BR-Wavenet-A"
@@ -136,27 +138,32 @@ class AssistenteGenAI:
         )
 
     def falar_voice_google(self, text):
-        # Salvar o arquivo de áudio na pasta static
-        audio_file_path = './static/audio.mp3'  # Caminho atualizado para a pasta static
+        try:
+            # Salvar o arquivo de áudio na pasta static
+            audio_file_path = './static/audio.mp3'  # Caminho atualizado para a pasta static
 
-        # Criar o arquivo de áudio
-        tts = gTTS(text=text, lang='pt', slow=False, tld='com.br')
-        tts.save(audio_file_path)
+            # Criar o arquivo de áudio
+            tts = gTTS(text=text, lang='pt', slow=False, tld='com.br')
+            tts.save(audio_file_path)
 
-        # Acelerar o áudio
-        audio = AudioSegment.from_file(audio_file_path)
-        audio = audio.speedup(playback_speed=1.5)  # Aumentar a velocidade em 50%
-        audio.export(audio_file_path, format='mp3')
+            # Acelerar o áudio
+            audio = AudioSegment.from_file(audio_file_path)
+            audio = audio.speedup(playback_speed=1.5)  # Aumentar a velocidade em 50%
+            audio.export(audio_file_path, format='mp3')
 
-        # Inicializar o mixer
-        mixer.init(frequency=22050)  # Usar uma frequência padrão
-        mixer.music.load(audio_file_path)
-        mixer.music.play()
-        mixer.music.set_volume(0.8)
-        while mixer.music.get_busy():
-            pass
-        mixer.music.stop()
-        mixer.quit()
+            # Inicializar o mixer
+            mixer.init(frequency=22050)  # Usar uma frequência padrão
+            mixer.music.load(audio_file_path)
+            mixer.music.play()
+            mixer.music.set_volume(0.8)
+            while mixer.music.get_busy():
+                pass
+            mixer.music.stop()
+            mixer.quit()
+
+        except Exception as e:
+            print("Erro no google voice", e)
+
 
     def responder(self, user_input):
         try:

@@ -1,12 +1,12 @@
 # Use uma imagem base do Python
-FROM python:3.12-slim as backend
+FROM python:3.12 as backend
 
 # Defina o diretório de trabalho para o backend
 WORKDIR /app
 
 # Copie os arquivos de requisitos e instale as dependências do backend
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Copie o restante dos arquivos do projeto
 COPY . .
