@@ -169,7 +169,7 @@ class AssistenteGenAI:
 def ChatHistoryDisplay():
     # --- Chat History Display ---
     # Use a container with specific height and scrollbar for chat history
-    chat_history_container = st.container(height=500, border=True)
+    chat_history_container = st.container(height=800, border=True)
     with chat_history_container:
         for i, message in enumerate(st.session_state.messages):
             role = message["role"]
@@ -205,7 +205,7 @@ def ChatbotScreen(assistente: AssistenteGenAI):
     st.image("https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif", width=650)
     st.text("Seu droide de protocolo pessoal para produtividade, gerenciamento de tarefas, TDAH e Rotina.")
 
-    #ChatHistoryDisplay()
+    ChatHistoryDisplay()
 
     # --- Audio Player ---
     # Display audio player ONLY if the corresponding button was just clicked
