@@ -205,7 +205,7 @@ def ChatbotScreen(assistente: AssistenteGenAI):
     st.image("https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif", width=650)
     st.text("Seu droide de protocolo pessoal para produtividade, gerenciamento de tarefas, TDAH e Rotina.")
 
-    ChatHistoryDisplay()
+    #ChatHistoryDisplay()
 
     # --- Audio Player ---
     # Display audio player ONLY if the corresponding button was just clicked
@@ -275,6 +275,7 @@ def C3poChatbotPage():
         # Start with a fresh copy of the initial history
         st.session_state.messages = list(historico_c3po_inicial)
         print("Histórico de chat inicializado.")
+
     if 'current_audio_bytes' not in st.session_state:
         st.session_state.current_audio_bytes = None
     if 'current_audio_key' not in st.session_state:
