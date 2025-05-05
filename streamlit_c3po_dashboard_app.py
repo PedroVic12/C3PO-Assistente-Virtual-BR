@@ -15,7 +15,7 @@ import os
 
 from  src.utils.config import API_KEY, DEFAULT_MODEL, historico_c3po_inicial, CSS
 
-from .src.utils import funcao_seno, sinal_pwm, circuito_rc
+from src.utils import funcao_seno, sinal_pwm, circuito_rc
 
 # --- Backend AI and TTS Class ---
 class AssistenteGenAI:

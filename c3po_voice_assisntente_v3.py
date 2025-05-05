@@ -12,6 +12,16 @@ import speech_recognition as sr # Adicionado para STT
 from  src.utils.config import API_KEY, DEFAULT_MODEL, historico_c3po_inicial, CSS
 
 
+
+# pip install streamlit google-generativeai gTTS SpeechRecognition matplotlib numpy
+
+# Dependendo do seu sistema, você pode precisar instalar PyAudio para acesso ao microfone:
+# Windows: pip install PyAudio
+# Mac: brew install portaudio && pip install pyaudio
+# Linux (Debian/Ubuntu): sudo apt-get install portaudio19-dev python3-pyaudio && pip install pyaudio
+# Linux (Fedora): sudo dnf install portaudio-devel python3-pyaudio && pip install pyaudio
+
+
 # --- Configurações e Constantes ---
 # Coloque sua chave de API aqui diretamente ou carregue de um arquivo/env
 ## É RECOMENDADO NÃO COLOCAR A CHAVE DIRETAMENTE NO CÓDIGO EM PRODUÇÃO
