@@ -162,15 +162,7 @@ class AssistenteGenAI:
             return f"🤖 Houve um erro: {error_msg}", None, error_msg
 
 
-# --- Frontend Functions ---
-def ChatbotScreen(assistente: AssistenteGenAI):
-    """Renders the chat interface and handles interactions."""
-
-    st.title("Assistente C3PO")
-    #st.image("https://media1.tenor.com/m/yYZMAqky0HYAAAAC/c3po-star-wars.gif", width=150) # Animated GIF
-    st.image("https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif", width=650)
-    st.text("Seu droide de protocolo pessoal para produtividade, gerenciamento de tarefas, TDAH e Rotina.")
-
+def ChatHistoryDisplay():
     # --- Chat History Display ---
     # Use a container with specific height and scrollbar for chat history
     chat_history_container = st.container(height=500, border=True)
@@ -197,6 +189,19 @@ def ChatbotScreen(assistente: AssistenteGenAI):
                                 st.session_state.current_audio_bytes = audio_bytes
                                 st.session_state.current_audio_key = tts_button_key # Store key to avoid re-playing on unrelated reruns
                                 st.rerun()
+
+    return chat_history_container
+
+# --- Frontend Functions ---
+def ChatbotScreen(assistente: AssistenteGenAI):
+    """Renders the chat interface and handles interactions."""
+
+    st.title("Assistente C3PO")
+    #st.image("https://media1.tenor.com/m/yYZMAqky0HYAAAAC/c3po-star-wars.gif", width=150) # Animated GIF
+    st.image("https://moseisleychronicles.wordpress.com/wp-content/uploads/2015/11/untitled-215.gif", width=650)
+    st.text("Seu droide de protocolo pessoal para produtividade, gerenciamento de tarefas, TDAH e Rotina.")
+
+    ChatHistoryDisplay()
 
     # --- Audio Player ---
     # Display audio player ONLY if the corresponding button was just clicked
