@@ -15,7 +15,10 @@ import os
 
 from  src.utils.config import API_KEY, DEFAULT_MODEL, historico_c3po_inicial, CSS
 
-from src.utils import funcao_seno, sinal_pwm, circuito_rc
+
+#! Debugar questoes de imports dos graficos e tabelas de engenharia eletrica alimentando LLM no setup
+
+#from src.utils import funcao_seno, sinal_pwm, circuito_rc
 
 # --- Backend AI and TTS Class ---
 class AssistenteGenAI:
@@ -287,23 +290,23 @@ def C3poChatbotPage():
         handle_gemini_response(assistente)
 
 
-    with col2:
-        st.header("📊 Dashboard Simples")
-        st.write("Visualização de dados de exemplo.")
+    # with col2:
+    #     st.header("📊 Dashboard Simples")
+    #     st.write("Visualização de dados de exemplo.")
         
-        # Criação das abas
-        tab1, tab2, tab3 = st.tabs(["Funções Seno e Cosseno", "Sinal PWM", "Resposta de Circuito RC"])
-        with tab1:
-            st.subheader("Funções Seno e Cosseno")
-            funcao_seno()
+    #     # Criação das abas
+    #     tab1, tab2, tab3 = st.tabs(["Funções Seno e Cosseno", "Sinal PWM", "Resposta de Circuito RC"])
+    #     with tab1:
+    #         st.subheader("Funções Seno e Cosseno")
+    #         funcao_seno()
 
-        with tab2:
-            st.subheader("Sinal PWM")
-            sinal_pwm()
+    #     with tab2:
+    #         st.subheader("Sinal PWM")
+    #         sinal_pwm()
 
-        with tab3:
-            st.subheader("Resposta de Circuito RC")
-            circuito_rc()
+    #     with tab3:
+    #         st.subheader("Resposta de Circuito RC")
+    #         circuito_rc()
 
 # --- Run the App ---
 if __name__ == "__main__":
