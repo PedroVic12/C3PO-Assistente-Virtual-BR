@@ -11,15 +11,18 @@ import speech_recognition as sr # Adicionado para STT
 
 from  src.utils.config import API_KEY, DEFAULT_MODEL, historico_c3po_inicial, CSS
 
+#! SITE FREE TEXT TO SPEECH
 
-
-# pip install streamlit google-generativeai gTTS SpeechRecognition matplotlib numpy
+# https://ttsmp3.com/text-to-speech/Brazilian%20Portuguese/
 
 # Dependendo do seu sistema, você pode precisar instalar PyAudio para acesso ao microfone:
 # Windows: pip install PyAudio
 # Mac: brew install portaudio && pip install pyaudio
 # Linux (Debian/Ubuntu): sudo apt-get install portaudio19-dev python3-pyaudio && pip install pyaudio
 # Linux (Fedora): sudo dnf install portaudio-devel python3-pyaudio && pip install pyaudio
+
+
+# pip install streamlit google-generativeai gTTS SpeechRecognition matplotlib numpy
 
 
 # --- Configurações e Constantes ---

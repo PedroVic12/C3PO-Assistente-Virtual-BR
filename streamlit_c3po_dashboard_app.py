@@ -15,6 +15,10 @@ import os
 
 from  src.utils.config import API_KEY, DEFAULT_MODEL, historico_c3po_inicial, CSS
 
+#! SITE FREE TEXT TO SPEECH
+
+# https://ttsmp3.com/text-to-speech/Brazilian%20Portuguese/
+
 
 #! Debugar questoes de imports dos graficos e tabelas de engenharia eletrica alimentando LLM no setup
 
