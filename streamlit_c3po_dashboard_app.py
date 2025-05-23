@@ -137,6 +137,7 @@ class AssistenteGenAI:
             response.resolve() # Ensure the response is fully processed
 
             if response.candidates and response.candidates[0].content.parts:
+
                 response_text = "".join(part.text for part in response.candidates[0].content.parts if hasattr(part, 'text'))
                 ai_response_for_history = {"role": "model", "parts": [{"text": response_text}]}
                 print(f"Gemini respondeu: {response_text[:50]}...") # Log response
