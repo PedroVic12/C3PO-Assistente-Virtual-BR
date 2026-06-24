@@ -1,0 +1,40 @@
+# Slide 1: Título da Apresentação
+
+Bem-vindo ao pipeline unificado de apresentações!
+
+---
+
+# Slide 2: Arquitetura do Projeto
+
+- **Fonte Única:** `apresentacao.md`
+- **Frontend:** Astro + Bootstrap para slides web.
+- **Backend:** Flask + Python para conversões.
+- **Automação:** Shell script para setup.
+
+---
+
+# Slide 3: Design Patterns Utilizados
+
+- **Factory Method:** Para criar conversores (`PDF`, `PPTX`, `VIDEO`).
+- **Strategy:** Cada conversor é uma estratégia diferente.
+- **Singleton:** Para garantir uma única instância do parser do Markdown.
+- **Facade:** Simplifica a execução das conversões com `run.py`.
+
+---
+
+# Slide 4: Geração de Vídeo
+
+Cada slide vira um frame de 2 segundos.
+
+*Utilizamos a biblioteca MoviePy em Python para compor o vídeo final.*
+
+![Placeholder de Imagem](https://placehold.co/800x600/0ea5e9/ffffff?text=Exemplo+de+Imagem)
+
+---
+
+# Slide 5: Próximos Passos
+
+1.  Escrever o conteúdo no `apresentacao.md`.
+2.  Rodar `python backend/run.py all`.
+3.  Visualizar os resultados!
+

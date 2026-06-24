@@ -1,0 +1,35 @@
+---
+import { promises as fs } from 'fs';
+import path from 'path';
+import { marked } from 'marked';
+import Layout from '../layouts/Layout.astro';
+
+// Lê o conteúdo do .md e divide em slides
+const mdPath = path.resolve(process.cwd(), '../assets/apresentacao.md');
+const mdContent = await fs.readFile(mdPath, 'utf-8');
+const slides = mdContent.split(/\n---\n/);
+
+const htmlSlides = slides.map(slide => marked.parse(slide));
+---
+
+<Layout title="Apresentação">
+  <main>
+    <div id="presentationCarousel" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        {htmlSlides.map((slide, index) => (
+          <div class={`carousel-item ${index === 0 ? 'active' : ''}`}>
+            <div class="slide" set:html={slide} />
+          </div>
+        ))}
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#presentationCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Anterior</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#presentationCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Próximo</span>
+      </button>
+    </div>
+  </main>
+</Layout>

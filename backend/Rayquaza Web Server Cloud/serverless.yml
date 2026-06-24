@@ -1,0 +1,12 @@
+service: rayquaza-web-server-cloud
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: us-east-1
+
+functions:
+  app:
+    handler: handler.handler
+    events:
+      - httpApi: '*'

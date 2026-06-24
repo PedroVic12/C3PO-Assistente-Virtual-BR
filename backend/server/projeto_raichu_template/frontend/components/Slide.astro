@@ -1,0 +1,8 @@
+---
+// Slide.astro - componente simples (opcional)
+const { html, index } = Astro.props;
+---
+<div class="card p-3 mb-3">
+  <h5>Slide {index}</h5>
+  <div innerHTML={html}></div>
+</div>

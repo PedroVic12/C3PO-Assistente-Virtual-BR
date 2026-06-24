@@ -1,0 +1,7 @@
+Flask
+python-pptx
+markdown-pdf
+moviepy
+Pillow
+beautifulsoup4
+markdown

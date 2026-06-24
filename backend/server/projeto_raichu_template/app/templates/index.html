@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Raichu - Flask + Tailwind</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <nav class="bg-blue-700 text-white p-4">
+      <div class="max-w-5xl mx-auto">RaichuWebServer - Flask + Tailwind</div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-6">
+      <h1 class="text-2xl font-bold mb-4">Dashboard de Exemplos</h1>
+
+      <div id="app" class="bg-white rounded-lg shadow p-4">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <button id="btnLoad" class="px-3 py-1 bg-green-500 text-white rounded">Carregar</button>
+            <button id="btnNew" class="px-3 py-1 bg-blue-500 text-white rounded">Novo</button>
+          </div>
+          <div id="apiStatus" class="text-sm text-gray-600">Verificando API...</div>
+        </div>
+
+        <div id="tableRoot" class="overflow-auto"></div>
+      </div>
+    </main>
+
+    <script src="/static/js/App.js"></script>
+  </body>
+</html>

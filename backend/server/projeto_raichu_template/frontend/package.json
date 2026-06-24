@@ -1,0 +1,8 @@
+{
+  "name": "raichu-frontend",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "echo \"Substitua pelo comando do Astro (ex: astro dev)\" && sleep 9999",
+    "build": "echo \"Substitua pelo build do Astro\""
+  }
+}

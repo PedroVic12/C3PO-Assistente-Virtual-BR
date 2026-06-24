@@ -1,0 +1,26 @@
+---
+// index.astro - lê assets/apresentacao.md e renderiza slides
+import fs from "fs";
+const md = fs.readFileSync(new URL('../../assets/apresentacao.md', import.meta.url)).toString();
+const slides = md.split('---').map(s=>s.trim()).filter(Boolean);
+---
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Apresentação - Astro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark mb-4"><div class="container">Astro Slides - {slides[0].split('\n')[0]}</div></nav>
+    <div class="container">
+      {slides.map((slide, idx) => (
+        <section class="card mb-3 p-3" key={idx}>
+          <h5>Slide {idx+1}</h5>
+          ola mundo!
+          <div set:html={Astro.markdown(slide)}></div>
+        </section>
+      ))}
+    </div>
+  </body>
+</html>
