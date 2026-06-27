@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle por Voz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Cabeçalho -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Controle por Voz</h1>
+            <p class="text-gray-600 mt-2">Diga "executar um", "executar dois" ou "executar três"</p>
+        </div>
+
+        <!-- Botão de Microfone -->
+        <div class="text-center mb-8">
+            <button id="micButton" class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors">
+                <span id="micStatus">Ativar Microfone</span>
+            </button>
+        </div>
+
+        <!-- Botões de Programa -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Botão 1 -->
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <div id="button1" class="w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl font-bold transition-colors" style="background-color: #e0e0e0;">
+                    1
+                </div>
+                <p class="text-gray-700">Programa Um</p>
+            </div>
+
+            <!-- Botão 2 -->
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <div id="button2" class="w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl font-bold transition-colors" style="background-color: #e0e0e0;">
+                    2
+                </div>
+                <p class="text-gray-700">Programa Dois</p>
+            </div>
+
+            <!-- Botão 3 -->
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <div id="button3" class="w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl font-bold transition-colors" style="background-color: #e0e0e0;">
+                    3
+                </div>
+                <p class="text-gray-700">Programa Três</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isListening = false;
+
+        // Elementos
+        const micButton = document.getElementById('micButton');
+        const micStatus = document.getElementById('micStatus');
+        const buttons = {
+            button1: document.getElementById('button1'),
+            button2: document.getElementById('button2'),
+            button3: document.getElementById('button3')
+        };
+
+        // Toggle microfone
+        micButton.addEventListener('click', async () => {
+            const response = await fetch('/toggle_listening');
+            const data = await response.json();
+            isListening = data.is_listening;
+            
+            if (isListening) {
+                micButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                micButton.classList.add('bg-red-500', 'hover:bg-red-600');
+                micStatus.textContent = 'Desativar Microfone';
+            } else {
+                micButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+                micButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                micStatus.textContent = 'Ativar Microfone';
+            }
+        });
+
+        // Verificar estado dos botões
+        async function checkButtonStates() {
+            const response = await fetch('/get_button_states');
+            const states = await response.json();
+            
+            for (const [buttonId, state] of Object.entries(states)) {
+                const button = buttons[buttonId];
+                if (state) {
+                    button.style.backgroundColor = '#4CAF50';  // Verde
+                    // Reset após 2 segundos
+                    setTimeout(async () => {
+                        await fetch(`/reset_button/${buttonId}`);
+                        button.style.backgroundColor = '#e0e0e0';  // Cinza
+                    }, 2000);
+                }
+            }
+        }
+
+        // Verificar estados a cada 500ms
+        setInterval(checkButtonStates, 500);
+    </script>
+</body>
+</html>

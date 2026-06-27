@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Post Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .prose {
+            max-width: none;
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white">
+    <div class="container mx-auto p-6">
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Input Section -->
+            <div class="w-full md:w-1/3 space-y-6">
+                <div class="bg-[#f8f8f8] p-6 rounded-lg">
+                    <input type="text" id="title" placeholder="Blog Post Title"
+                        class="w-full p-3 border border-gray-300 rounded mb-4">
+                    
+                    <textarea id="outline" placeholder="Outline / Notes"
+                        class="w-full p-3 border border-gray-300 rounded mb-4 h-32"></textarea>
+                    
+                    <input type="text" id="keywords" placeholder="Target Keywords (comma separated)"
+                        class="w-full p-3 border border-gray-300 rounded mb-4">
+                    
+                    <button id="generateBtn" 
+                        class="w-full bg-[#333] text-white py-2 px-4 rounded hover:bg-[#444] mb-4">
+                        Generate Post
+                    </button>
+                    
+                    <button id="searchBtn"
+                        class="w-full bg-[#666] text-white py-2 px-4 rounded hover:bg-[#777]">
+                        Check Top Search Results
+                    </button>
+                </div>
+
+                <!-- Search Results Section -->
+                <div id="searchResults" class="bg-[#f8f8f8] p-6 rounded-lg hidden">
+                    <h3 class="font-semibold mb-4">Top Search Results</h3>
+                    <ul id="searchResultsList" class="space-y-3"></ul>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="w-full md:w-2/3">
+                <div class="bg-[#f8f8f8] p-6 rounded-lg min-h-[600px]">
+                    <div id="output" class="prose max-w-none"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generating = false;
+
+        async function generatePost() {
+            if (generating) return;
+            
+            const title = document.getElementById('title').value;
+            const outline = document.getElementById('outline').value;
+            const keywords = document.getElementById('keywords').value;
+            const output = document.getElementById('output');
+            const generateBtn = document.getElementById('generateBtn');
+            
+            if (!title) {
+                alert('Please enter a title');
+                return;
+            }
+
+            generating = true;
+            generateBtn.textContent = 'Generating...';
+            output.innerHTML = '<div class="animate-pulse">Generating content...</div>';
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ title, outline, keywords })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let content = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = JSON.parse(line.slice(6));
+                            content += data.content;
+                            output.innerHTML = content;
+                        }
+                    }
+                }
+            } catch (error) {
+                output.innerHTML = `Error: ${error.message}`;
+            } finally {
+                generating = false;
+                generateBtn.textContent = 'Generate Post';
+            }
+        }
+
+        async function searchTopResults() {
+            const title = document.getElementById('title').value;
+            if (!title) {
+                alert('Please enter a title');
+                return;
+            }
+
+            const searchResults = document.getElementById('searchResults');
+            const searchResultsList = document.getElementById('searchResultsList');
+            
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(title)}`);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    searchResultsList.innerHTML = data.items.slice(0, 10).map(result => `
+                        <li class="text-sm">
+                            <a href="${result.link}" target="_blank" rel="noopener noreferrer" 
+                               class="text-blue-600 hover:underline">
+                                ${result.title}
+                            </a>
+                        </li>
+                    `).join('');
+                    searchResults.classList.remove('hidden');
+                } else {
+                    searchResultsList.innerHTML = '<li>No results found</li>';
+                }
+            } catch (error) {
+                searchResultsList.innerHTML = `<li>Error: ${error.message}</li>`;
+            }
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', generatePost);
+        document.getElementById('searchBtn').addEventListener('click', searchTopResults);
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"  # Flask API
+      - "8550:8550"  # Flet UI
+    volumes:
+      - ./storage:/app/storage
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DB=voice_control_app
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - STORAGE_PATH=/app/storage
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
