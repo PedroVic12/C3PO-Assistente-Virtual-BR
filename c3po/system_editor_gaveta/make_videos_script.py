@@ -36,10 +36,10 @@ class AudioToVideoConverter:
         """Cria um GIF a partir das imagens processadas."""
         if not self.list_of_images:
             raise ValueError("Nenhuma imagem foi processada.")
-            if self.audio_length is None:
-                raise ValueError("Could not determine audio length")
-            duration = self.audio_length / len(self.list_of_images)
-            imageio.mimsave(self.gif_path, self.list_of_images, fps=1 / duration)
+        if self.audio_length is None:
+            raise ValueError("Could not determine audio length")
+        duration = self.audio_length / len(self.list_of_images)
+        imageio.mimsave(self.gif_path, self.list_of_images, fps=1 / duration)
         print(f"GIF criado em: {self.gif_path}")
 
     def create_video(self, fps=60):
