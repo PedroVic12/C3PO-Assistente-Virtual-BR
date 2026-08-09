@@ -29,10 +29,13 @@ VOICES = [
     "pm_santa" # voz em pt br
 ]
 
-VOICE = VOICES[2]  
+VOICE = VOICES[2]
 LANGUAGE = "p"
 sample_rate = 24 * 1000  # 24kHz
 
+ROOT_DIR = Path(__file__).resolve().parent
+SOUNDS_DIR = ROOT_DIR / "sounds"
+SOUNDS_DIR.mkdir(parents=True, exist_ok=True)
 
 pipeline = KPipeline(
     lang_code=LANGUAGE,
@@ -45,6 +48,13 @@ def carregar_texto(texto_entrada):
         if caminho.exists() and caminho.is_file():
             return caminho.read_text(encoding="utf-8")
     return str(texto_entrada)
+
+
+def resolver_caminho_saida(output_path):
+    caminho = Path(output_path)
+    if caminho.is_absolute():
+        return caminho
+    return SOUNDS_DIR / caminho
 
 
 def falar_tts_local(texto, voice, playback=False, output_path="fala_completa.wav"):
@@ -67,9 +77,15 @@ def falar_tts_local(texto, voice, playback=False, output_path="fala_completa.wav
             sd.play(stream, samplerate=sample_rate)
             sd.wait()
 
-        output_file = Path(output_path)
+        output_file = resolver_caminho_saida(output_path)
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         sf.write(str(output_file), stream, sample_rate)
         print(f"Áudio completo salvo como {output_file}")
+
+        for i, (_, _, audio) in enumerate(results):
+            chunk_path = SOUNDS_DIR / f"segmento_{i + 1:02d}_{output_file.stem}.wav"
+            sf.write(str(chunk_path), audio, sample_rate)
+            print(f"Segmento {i + 1} salvo como {chunk_path}")
     else:
         print("Nenhum áudio foi gerado.")
 
