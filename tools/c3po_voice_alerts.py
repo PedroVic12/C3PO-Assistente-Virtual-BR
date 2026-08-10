@@ -25,6 +25,23 @@ class C3POVoiceAlerts:
     def speak(self, text):
         print(f"🔊 C3PO: '{text}'")
         
+        # Método Principal: Kokoro TTS nativo/local usando UV via run_kokoro_tts.sh
+        try:
+            tts_script = "/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/tools/run_kokoro_tts.sh"
+            texto_file = "/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/tools/voz-TTS-pt-br/texto_entrada.txt"
+            
+            os.makedirs(os.path.dirname(texto_file), exist_ok=True)
+            with open(texto_file, "w", encoding="utf-8") as f:
+                f.write(text)
+            
+            res = subprocess.run(["bash", tts_script, texto_file], capture_output=True, text=True)
+            if res.returncode == 0:
+                return
+            else:
+                print(f"[Aviso] Kokoro TTS retornou aviso: {res.stderr}")
+        except Exception as e:
+            print(f"[Aviso] Falha ao executar Kokoro TTS: {e}")
+
         # Fallback 1: Native Linux spd-say (highly native, no library issues, supports pt-BR)
         if self._run_command(["which", "spd-say"]):
             try:

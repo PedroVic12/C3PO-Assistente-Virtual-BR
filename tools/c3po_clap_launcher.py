@@ -49,6 +49,21 @@ def rms_mono(block: np.ndarray) -> float:
     return float(np.sqrt(np.mean(block**2)))
 
 def play_alert_voice(text):
+    # Método Principal: Kokoro TTS nativo/local usando UV via run_kokoro_tts.sh
+    try:
+        tts_script = "/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/tools/run_kokoro_tts.sh"
+        texto_file = "/home/pedrov12/Documentos/GitHub/C3PO-Assistente-Virtual-BR/tools/voz-TTS-pt-br/texto_entrada.txt"
+        
+        os.makedirs(os.path.dirname(texto_file), exist_ok=True)
+        with open(texto_file, "w", encoding="utf-8") as f:
+            f.write(text)
+        
+        res = subprocess.run(["bash", tts_script, texto_file], capture_output=True, text=True)
+        if res.returncode == 0:
+            return
+    except Exception:
+        pass
+
     # Try spd-say (extremely fast and native on Linux)
     try:
         if subprocess.run(["which", "spd-say"], capture_output=True).returncode == 0:
