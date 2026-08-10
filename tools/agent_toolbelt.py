@@ -123,11 +123,11 @@ class AgentToolbelt:
             return None
 
     def voice_menu(self):
-        self.speak("Bom dia, mestre Pedro Victor. Qual programa deseja rodar?")
+        self.speak("Olá, Bom dia, mestre Pedro Victor. Qual programa deseja rodar hoje?")
         spoken_text = self.listen_and_recognize()
         
         if not spoken_text:
-            self.speak("Opção não compreendida. Iniciando menu visual do sistema.")
+            #self.speak("Opção não compreendida. Iniciando menu visual do sistema.")
             subprocess.run(["bash", "/home/pedrov12/Documentos/GitHub/Jedi-CyberPunk/PVRV/run_system.sh", "--fallback-menu"])
             return
 

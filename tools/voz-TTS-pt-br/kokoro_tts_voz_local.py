@@ -7,6 +7,7 @@ from kokoro import KPipeline
 import soundfile as sf
 import numpy as np
 import sounddevice as sd
+import subprocess
 import os
 
 # uv init
@@ -24,12 +25,13 @@ import os
 
 VOICES = [
     "af_heart", # default
-    "pf_dora", # voz em pt br
-    "pm_alex", # voz em pt br
-    "pm_santa" # voz em pt br
+    "pf_dora", # voz em pt br feminina
+    "pm_alex", # voz em pt br masculina
+    "pm_santa" # voz em pt br Papai noel
 ]
 
-VOICE = VOICES[2]
+VOICE = VOICES[1]
+
 LANGUAGE = "p"
 sample_rate = 24 * 1000  # 24kHz
 
@@ -93,6 +95,9 @@ def falar_tts_local(texto, voice, playback=False, output_path="fala_completa.wav
 
 
 def main():
+    subprocess.run("clear", shell=True)
+
+    
     print("\n\nIniciando o Kokoro TTS local...\n\n")
 
 
@@ -107,7 +112,7 @@ def main():
         print(f"Arquivo não encontrado: {caminho}")
         return
 
-    print(f"Lendo texto do arquivo: {caminho}")
+    print(f"Lendo texto do arquivo: {caminho}\n\n")
     falar_tts_local(caminho, VOICE, playback=True, output_path="fala_completa.wav")
 
 
