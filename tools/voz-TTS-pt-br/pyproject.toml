@@ -7,7 +7,12 @@ authors = [
     { name = "Pedro Victor Veras", email = "pedrovictor.rveras12@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "kokoro>=0.9.4",
+    "numpy>=2.5.2",
+    "sounddevice>=0.5.5",
+    "soundfile>=0.14.0",
+]
 
 [project.scripts]
 voz-tts-ptbr = "voz_tts_ptbr:main"
