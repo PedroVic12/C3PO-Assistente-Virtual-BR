@@ -30,10 +30,11 @@ VOICES = [
     "pm_santa" # voz em pt br Papai noel
 ]
 
-VOICE = VOICES[1]
+VOICE = VOICES[3]
 
 LANGUAGE = "p"
-sample_rate = 24 * 1000  # 24kHz
+multiplicador = 1 # teste entre (0,1)
+sample_rate = multiplicador * 24 * 1000  # 24kHz
 
 ROOT_DIR = Path(__file__).resolve().parent
 SOUNDS_DIR = ROOT_DIR / "sounds"
