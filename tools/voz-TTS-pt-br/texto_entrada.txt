@@ -1,1 +1,1 @@
-Olá, Boa tarde, mestre Pedro Victor! Iniciando o detector de movimentos com OpenCV.
+Olá, Bom dia, mestre Pedro Victor! Qual programa devemos programar hoje?
