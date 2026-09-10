@@ -18,3 +18,5 @@ fi
 cd "$PROJECT_DIR"
 echo "Executando TTS com: $TEXT_FILE"
 uv run kokoro_tts_voz_local.py "$TEXT_FILE"
+echo "Gerando o arquivo de audio..."
+

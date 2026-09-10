@@ -30,7 +30,7 @@ VOICES = [
     "pm_santa" # voz em pt br Papai noel
 ]
 
-VOICE = VOICES[3]
+VOICE = VOICES[1]
 
 LANGUAGE = "p"
 multiplicador = 1 # teste entre (0,1)
