@@ -19,3 +19,5 @@ pydub
 streamlit
 matplotlib
 tqdm
+discord.py[voice]
+yt-dlp
