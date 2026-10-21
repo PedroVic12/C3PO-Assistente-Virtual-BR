@@ -1,0 +1,1 @@
+Refatorei a calistenia do Gohan: scroll no mobile, ids estáveis, timer com vibração, vídeos lazy. Build passou. Servidor na porta três mil. Scrapy Batcaverna criado e spider de teste rodou com sucesso.
