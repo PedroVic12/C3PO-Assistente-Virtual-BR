@@ -1,1 +1,1 @@
-Refatorei a calistenia do Gohan: scroll no mobile, ids estáveis, timer com vibração, vídeos lazy. Build passou. Servidor na porta três mil. Scrapy Batcaverna criado e spider de teste rodou com sucesso.
+Calistenia no ar na porta três mil. Mobile first reforçado. Novas abas: reels, carrossel de vídeos por categoria com labels, e hub de dados com import export Excel, PDF e JSON no localStorage. Planilha amostra disponível. Build passou.
