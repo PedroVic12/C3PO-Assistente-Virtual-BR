@@ -1,1 +1,1 @@
-Olá, Bom dia, mestre Pedro Victor! Qual programa devemos programar hoje?
+Olá, Boa tarde, mestre Pedro Victor! Abrindo o Dashboard Grafico Qt6 com Plotly e SQLite.
