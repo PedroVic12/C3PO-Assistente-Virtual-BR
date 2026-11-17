@@ -1,1 +1,1 @@
-Olá, Boa tarde, mestre Pedro Victor! Abrindo o Dashboard Grafico Qt6 com Plotly e SQLite.
+Olá, Bom dia, mestre Pedro Victor! Iniciando a interface gráfica Launcher GUI.
